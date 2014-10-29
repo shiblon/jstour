@@ -202,10 +202,15 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     $scope.clearOutput();
     try {
       var _output = function(text) {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        args = args.join(" ");
         if ($scope.out != "") {
           $scope.out += "\n";
         }
-        $scope.out += text;
+        $scope.out += args;
       };
       eval($scope.code);
     } catch(err) {

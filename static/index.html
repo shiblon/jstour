@@ -101,15 +101,450 @@
 
     alert("Hello, JavaScript!");
   </div>
-  <div name="test">
-    This is a test.
+  <div name="Comments">
+    JavaScript (and many other languages) ignores **comments**: bits of text
+    that start with |//| and extend to the end of the line. They are strictly
+    for humans to read, and do not affect how your program runs.
 
-    Text and stuff
+      // This is a comment.
+
+    There is also a multi-line version, delimited with two special symbols:
+
+      /* This is a
+         multi-line
+         comment. */
+
+    These are customarily formatted as seen in the code window, with repeated
+    asterisks and the terminator on a line by itself, but that is merely
+    convention. What makes it a comment is the way it begins and ends.
+
+    Comments are useful for making notes to yourself
+    or others about how the program's code works.
+
+    Note that comment delimiters like |//| or |/*| and |*/| have to stand alone
+    syntactically to form a comment; if they appear within a string, then they
+    are just part of the string.
+
+    Exercises
+
+    - Output a string with a comment delimiter inside of it, e.g., |alert("Not // a comment!")|.
 
     --
 
-    code
+    // This is a line comment. Line comments start
+    // with '//' and extend to the end of the line.
+
+    /* This is a multi-line comment.
+     * This formatting (with repeated asterisks) is
+     * conventional. The comment terminator stands alone.
+     */
+
+    alert("This is not a comment.");
   </div>
+  <div name="Variables">
+    A **variable** is a place to remember something.
+    You assign a value to a variable using the
+    **assignment operator** (a single |=|) like this:
+
+      var a = "hi";
+      var A = "hello";
+
+    Now the _variable_ |a| contains the _string_ |"hi"| and |A| contains
+    |"hello"|. Yes, case matters: |a| is not the same as |A|.
+
+    In JavaScript, variables spring into existence when they are declared with
+    |var| *or* assigned a value. Before that they do not exist, and referring
+    to them is an error (see the exercises). It is typical to declare and
+    assign at the same time. Until more is explained later about when it is
+    appropriate to omit it (hardly ever, it turns out), always use |var| when
+    assigning a variable for the first time.
+
+    A valid **variable name** can contain letters, numbers, and the characters
+    |_| and |$|, but cannot begin with a number (it can also use a substantial
+    set of Unicode characters, but we'll stick with plain ASCII for this
+    tutorial). A variable can contain any kind of value.
+
+    Exercises
+
+    - Try assiging to a variable name that starts with a number
+      (like |1eet|). See what happens.
+
+    - Assign a new variable to an existing one, e.g.,
+      |b = a|. Output it.
+
+    --
+
+    var a = "hi there";  // 'a' now contains a string of text.
+    alert(a);
+
+    // Here we *reassign* 'a' to contain a number. Note the lack of 'var'.
+    a = 10;
+    alert(a);
+
+    // The $ is just another character. It has no special meaning.
+    var $my_longer_varname = 14;
+    alert($my_longer_varname);
+
+    // Until assigned, variables do not exist.
+    alert(i_dont_exist);
+  </div>
+  <div name="Numbers">
+    JavaScript understands a few fundamental **types** of data. You have
+    already encountered a couple of them, namely _strings_ like |"hello"| and
+    _functions_ like |alert|. We'll get to functions later. For now, let's
+    focus on numbers.
+
+    You have already seen examples of numbers being assigned to variables, and
+    it works fairly naturally. Numbers do pretty much what you'd expect them
+    to. You can apply all of the basic mathematical operators to numbers:
+
+      * Multiply
+      + Add
+      - Subtract
+      / Divide
+      % Remainder
+
+    JavaScript represents all numbers in the same way underneath: as
+    _double-width IEEE floating point_ numbers, but you won't need to know much
+    about that for this tutorial. The important thing to know is that it knows
+    how to treat numbers as integers, as well, and sometimes we'll lie a bit
+    and pretend that it actually thinks of them that way.
+
+    Exercises
+
+    - Try adding |+| to the front of a number instead of |-|.
+
+    - Try using the modulus operator |%| between a couple of integer numbers.
+      What does it do?
+
+    --
+
+    // Normal decimal notation works great.
+    var myInt1 = 15;
+    var myInt2 = -25;
+
+    // As does hexadecimal!
+    var myInt3 = 0xdeadbeef;
+
+    // Various styles of floating point are allowed,
+    // including scientific notation.
+    var myFloat0 = 1.0;
+    var myFloat1 = 0.0423;
+    var myFloat2 = 1e-5;
+    var myFloat3 = 17.2e12;
+
+    // Let's see what that hex number above looks like:
+    alert(myInt3);
+
+    // Now for some operators:
+    alert(10 + 6);
+    alert(15 - 21);
+    alert(7 * 20);
+    alert(7 / 12);
+
+    // What is this value?
+    var a = 3 + 50 * 2;
+
+    // How about this?
+    var a = (3 + 50) * 2;
+ </div>
+  <div name="Basic Syntax Rules">
+    In the previous examples, we have taken it for granted that every statement
+    ends in a semicolon. JavaScript is kind of funny this way, because strictly
+    speaking, the semicolon is _not required_. There is a major caveat,
+    however. Sometimes the computer can't tell whether you intend to end a
+    statement or continue it.
+
+    Because of this, strange and unexpected things can happen if you omit the
+    semicolon. Consider the code window. There is an example of a case where
+    JavaScript can figure out what you meant, and another where it cannot.
+
+    There are many more such examples, so always be clear to the parser: use
+    semicolons at the end of statements.
+
+    Another important note: "whitespace" is not _usually_ significant. The
+    indentation shown in these slides is for human consumption. The computer
+    doesn't care about it. The same goes for blank lines, spaces between
+    operators and numbers, between statements in function calls, etc.
+
+    But this rule is not consistently applied. Where possible, JavaScript will
+    insert a virtual semicolon for you at the end of a line if it thinks it
+    can, and that can be tough to predict: it's best to just always use them.
+
+    Exercises:
+
+    - Before running the code, guess what the final output will be.
+
+    --
+
+    // This is fine. Not really ambiguous. Or is it?
+    var a = "hi there"
+
+    // This works, but it's sort of unclear that it should, because the end of
+    // a line *usually* takes the place of a missing semicolon. This doesn't look
+    // right to a human, but the parser handles it anyway. Many surprising errors
+    // have been hidden by code just like this.
+    var b = "hey "
+
+        + "there"
+
+    // It's even worse when you consider that the following is valid all by
+    // itself. It produces the value 50.3, but the value is
+    // immediately discarded:
+
+    + 50.3
+
+    // Therefore, so is this. Guess what it outputs.
+
+    var c = "number "
+
+    + 10
+
+    alert(c);
+  </div>
+  <div name="String Escaping">
+    There is no difference between |'| and |"| - they both form
+    equivalent strings. People usually pick one based on preference,
+    changing only to include quotes inside, like this:
+
+      "Don't touch my quoting."
+      'I need to "work", now.'
+
+    Occasionally, you need to include both kinds of
+    quotes inside of a string. In these cases, you can
+    **escape** quotes using a backslash:
+
+      "This string contains the \" delimiter."
+
+    Strings accept other escape sequences, like |'\n'|, which inserts
+    a line feed character, making a new line. More
+    info can be found here:
+
+    http://www.w3schools.com/js/js_strings.asp
+
+    Exercises
+
+    - Try creating a string that contains a backslash:
+      it will need to be escaped.
+
+    --
+
+    var message = ("This has a double quote \" inside.\n" +
+                   'This has a single quote \' inside.\n' +
+                   "This has a second line:\n  Yup.");
+
+    alert(message);
+  </div>
+  <div name="Calling Functions">
+    We are now ready to explain something we have been using all along:
+    function calls. JavaScript has a lot of stuff built in that you can just
+    use, and it exposes most of it through functions that you can call.
+
+    A function is called by placing parentheses after its name. If it accepts
+    **arguments**, then they go inside as in |alert("Hello there!")|, which
+    should look familiar.
+
+    All JavaScript functions also **return** something. This means that, in
+    addition to taking arguments _in_, they also send values _out_. To obtain
+    the returned value of a function, just use that function call in place of a
+    value, e.g., |a = parseInt("1723")| or |alert(parseInt("1723"))|.
+
+    You can call some functions with more than one value. In that case, supply
+    values separated by commas, e.g., |Math.pow(2, 10)| (more on that later).
+
+    Functions like |alert| are only used for their effect, so they implicitly
+    return the special value |undefined|. Another such function specifically
+    defined for convenience in this browser-based presentation is |_output|. It
+    accepts any number of arguments and outputs all of them, separated by
+    spaces, in the output window.
+
+    Exercises
+
+    - Try adding the strings |"2000"| to |"1000"|. Now try adding the result of
+      |parseInt("2000")| to |parseInt("1000")|. What happened? What is |parseInt|
+      doing?
+
+    - Convert the string |"3.14159"| into a floating-point number with
+      |parseFloat|.
+
+    - Peruse the reference material at
+      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects
+
+    --
+    // This evaluates to the number 2423, but it never used, so that value
+    // is discarded.
+    parseInt("2423");
+
+    // This is unique to this course. It is not a standard JavaScript function,
+    // but is provided for convenience as you monkey around.
+    _output("Hello, output window.");
+
+    // Note that alert evaluates to undefined:
+    var alertOutput = alert("hello");
+    _output("output of alert: " + alertOutput);
+
+    // You can convert strings to numbers:
+    var intVal = parseInt("42");
+    var floatVal = parseFloat("2.718281828");
+
+    // Note, we're kind of glossing over something big here: adding a string to
+    // a value first converts that value to a string, then joins them together.
+    _output("intVal", intVal);
+    _output("floatVal", floatVal);
+    _output("double floatVal", (2 * floatVal));
+
+    // Finally, you can plug evaluated functions directly into the arguments of
+    // other functions. Many of these functions are in their own namespace, and
+    // are specified by the namespace and a dot. Math, for example, has many
+    // interesting and useful functions:
+    _output(Math.floor(3.14159));
+  </div>
+  <div name="Objects and More Math">
+    Now that we know about function calls, we can talk about some of the more
+    interesting mathematical operations that are not expressed as symbols, like
+    taking a square root.
+
+    But first we need to talk a tiny bit about **objects**. You can think of a
+    JavaScript object as something that groups stuff that belongs together.
+    This definition will become more precise in time, but for now that is good
+    enough.
+
+    To access the stuff within an object, you name the object, put a dot after
+    it, and name the thing inside, like this:
+
+      Math.floor(55.3)
+
+    This calls the |floor| function that is held by the built-in JavaScript
+    |Math| object. There are many such built-in objects with many useful
+    functions inside, including things that manipulate strings, dates, times,
+    numbers, and elements on a web page that hosts your JavaScript.
+
+    Exercises
+
+    - Compute |Math.floor(52.5)| and |Math.ceil(52.5)|. What do these do?
+      What if you use negative numbers?
+
+    - Try adding a new value to the Math object by setting it, e.g.,
+      |Math.myAwesomeValue = 42;|. Did it work?
+
+    --
+
+    _output("pi =", Math.PI);
+    _output("sin(pi/2) =", Math.sin(Math.PI / 2));
+
+    // Uh-oh - why is this not exactly equal to 0.5?
+    // The answer lies in the IEEE floating point definition. Some numbers
+    // cannot be expressed perfectly in floating point.
+    _output("cos(pi/3) =", Math.cos(Math.PI / 3));
+
+    _output("sin(pi/3) =", Math.sin(Math.PI / 3));
+
+    _output("tan(pi/3) =", Math.tan(Math.PI / 3));
+
+    // Square roots work:
+    _output("sqrt(2) =", Math.sqrt(2));
+
+    // And you can take other roots using negative powers:
+    _output("cube root of 3 =", Math.pow(3, -3));
+
+    _output("4 to the 3rd power =", Math.pow(4, 3));
+
+    // Wait, did you expect this? How big is this number?
+    _output("sin(pi) =", Math.sin(Math.PI));
+  </div>
+  <div name="Everything is an Object">
+    Remember how we said that objects are sort of like containers that hold
+    stuff inside of them? Well, it turns out that in JavaScript, _everything_
+    is an object, including things like strings and numbers. The *prototypes*
+    of these objects are |String| and |Number|, respectively (capitalization
+    matters).
+
+    A function that operates on the object that holds it is typically called a
+    **method** of that object. You'll see the terms used interchangeably
+    sometimes.
+
+    For now, let's explore the idea that everything is an object. Strings, for
+    example, have a few very useful methods, as do numbers. Take a look in the
+    code window for some examples.
+
+    Exercises
+
+    - Look at the documentation for String at
+      http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String .
+      Try a few methods in the code window.
+
+    --
+
+    // The "length" member of every string tells you how many characters it
+    // contains.
+    _output("Hi there!".length);
+
+    // The "slice" method takes a starting index and an ending index, and
+    // returns a string from start (inclusive) to end (exclusive).
+    _output("0123456789".slice(2, 5));
+
+    // The "split" method allows you to split a string up into words, and
+    // accepts a delimiter.
+    _output("1:b:%".split(":"));
+
+    // Variables are just names for things like strings, etc., so you can
+    // obviously call methods on them as well.
+
+    // The "trim" method removes space from the beginning and end of a string.
+    var s = "  A string with leading and trailing space.   ";
+    var s_trimmed = s.trim();
+    _output("'" + s_trimmed + "'");
+
+    // When doing this trick with numbers, you need parentheses, otherwise
+    // it looks like you're specifying a floating point because of the dot.
+    // Note that many objects have a "toString" method.
+    _output((253).toString());
+  </div>
+  <div name="Getting Help">
+    There are a lot of functions available in JavaScript itself. You can find
+    documentation for these at a couple of popular places.
+
+      Official: http://developer.mozilla.org/
+      Popular: http://www.w3schools.com/jsref
+
+    In addition to what the language itself has to offer, JavaScript usually
+    runs in a **hosted environment**, which will expose its own variables,
+    types, and functions that you can use to manipulate that environment.
+
+    One of the most common hosted environments is the web browser, though
+    you can also run JavaScript without a browser in environments like
+    "node.js". We'll focus mostly on the browser for this tutorial.
+
+    The point is that there are so many functions and variables available
+    that even seasoned developers do their work with the documentation open
+    all the time. Don't hesitate to keep the documents in front of you when
+    you are working on solving a problem.
+
+    Since we work within the web browser most of the time, it is useful to
+    know what that environment is called. It is referred to as the "Document
+    Object Model" or "DOM". Documentation for the DOM is often found
+    side-by-side with generic JavaScript documentation, and that is certainly
+    the case for http://www.w3schools.com/jsref, as well as for the official
+    http://developer.mozilla.org/ site.
+
+    Exercises
+
+    - Poke around the two sites above and see if you can find the JavaScript
+      documentation.
+
+    - Now look for DOM documentation. They're organized slightly differently
+      but you should see some big similarities once you drill down a bit.
+
+    --
+
+    // What is this? No idea? Try looking it up!
+    // Also, remember how you can use a function call anywhere a value is needed?
+    // What does this "chained replace" do below?
+    //   REMINDER: the left side of dots like these has to be an object.
+    var a = "\tHello there\n".replace("\t", "&lt;tab&gt;").replace("\n", "&lt;newline&gt;");
+
+    _output(a);
+ </div>
 </div>
 </body>
 </html>
