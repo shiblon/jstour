@@ -5,6 +5,8 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     var e = window.event || event;
     if (e.keyCode == 13 && e.shiftKey) {  // shift-enter
       $scope.runCode();
+      $scope.$apply();
+      return false;
     } else if (e.keyCode == 33) {  // page up
       $scope.location.path("/" + $scope.prevChapter());
       $scope.$apply();
@@ -17,6 +19,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   });
 
   $scope.location = $location;
+  $scope.canvas = null;
 
   // This naively assumes that the dirty state is "sticky" unless you force a
   // full recomputation. Works for most purposes in the UI.
@@ -211,6 +214,30 @@ function CodeCtrl($scope, $http, $location, $timeout) {
           $scope.out += "\n";
         }
         $scope.out += args;
+      };
+      var _canvas = function(width, height) {
+        if ($scope.canvas == null) {
+          var container = document.getElementById("output");
+          $scope.canvas = document.createElement("canvas");
+          if (width === undefined) {
+            width = 200;
+          }
+          if (height === undefined) {
+            height = 200;
+          }
+          $scope.canvas.width = width;
+          $scope.canvas.height = height;
+          $scope.canvas.style.border = "1px solid black";
+          container.appendChild($scope.canvas);
+        }
+        if (!(width === undefined || width == null || width == $scope.canvas.width)) {
+          $scope.canvas.width = width;
+        }
+        if (!(height === undefined || height == null || height == $scope.canvas.height)) {
+          $scope.canvas.height = height;
+        }
+        var ctx = $scope.canvas.getContext("2d");
+        return ctx;
       };
       eval($scope.code);
     } catch(err) {

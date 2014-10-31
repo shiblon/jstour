@@ -20,7 +20,8 @@
 <body ng-controller="CodeCtrl">
 <div id="content_container" ng-class="{'collapsed': contentCollapsed}">
   <div id="toc-trigger">
-    <a href="/doc" target="_new">Docs</a>
+    <a href="http://developer.mozilla.org/" target="mdn_docs">MDN Docs</a> |
+    <a href="http://w3schools.com/" target="w3schools_docs">W3 Schools Docs</a>
   </div>
   <div id="content-header">
     <h1>Interactive JavaScript Tutorial <span class="toc" ng-click="tocShowing = !tocShowing">&#x25bc;</span></h1>
@@ -545,6 +546,449 @@
 
     _output(a);
  </div>
+ <div name="Equality, Null, and Ordering">
+    Things are **equal** to each other if they have the _same values_. In
+    JavaScript, testing for equality is done using the |==| operator, and
+    inequality is tested with |!=|. As you might expect, |10 != "10"| (one is a
+    Number, the other is a String), but |10 == 5 + 5| (both sides are numbers
+    with the same value). The value of these operations is a *boolean value*,
+    one of **true** or **false**.
+
+    With variables, things get a little bit more interesting. Suppose you have
+    two index cards, each with the number |5| on them. Each card is a
+    _variable_, and the "5" written on them is their _value_. Because they have
+    the same values, they are **equal** in the |==| sense: they contain the
+    same data. But they are not the same card.
+
+    Now suppose I write "5" on one card, show it to you, and say "This is |a|".
+    Then I show you _the same card again_, but say, "This is |b|". In this
+    case, |a| and |b| are equal in the |is| sense: they are not only equal (|a
+    == b|), they are also referring to the same card (|a === b|). This normally
+    does not matter much, but you will occasionally see |===| in use and should
+    at least know what it means.
+
+    Stretching the index card metaphor to the breaking point, there is a
+    special value in JavaScript called **null**, and you can store it in any variable.
+    Similarly, **undefined** is like having no index card at all, or a blank
+    index card (though this is a gross oversimplification).
+
+    Exercises
+
+    - There are other comparison operators, and they
+      do what you'd expect, even on strings and other
+      sequences. Experiment with |&lt;|, |&lt;=|, |&gt;|, and
+      |&gt;=| - see what happens when you print something
+      like |5 &lt; 7| or |'hello' &gt;= 'hello there'|.
+
+    --
+
+    _output("Equality is squishy with strings and numbers.");
+    _output("10" == 10);  // true
+    _output("10" === 10); // false
+    _output(10 == 5 + 5); // true
+
+    _output("Variable assignment satisfies ===");
+    var a = 1543;
+    var b = a;
+
+    _output(a == b);   // Obviously true - same data.
+    _output(a != a+1); // Indeed.
+    _output(a === b);  // Also true. Assignment satisfies '==='.
+
+    // Performing an operation on data like numbers or
+    // strings produces a *new thing*, even if the data is
+    // the same.
+    _output("Same data, might not be the same thingy.");
+    b = a + 1 - 1 * 1.0;
+
+    _output(a == b);   // Still true.
+    _output(a === b);  // Might be true, might not, depending on the implementation.
+
+    _output("not null:", a != null);  // A very common kind of test.
+    var c = null;
+    _output(c !== null);  // false
+ </div>
+ <div name="Sequences">
+   You have already seen one kind of sequence: the String. You can access
+   members of a string using the |[]| operator:
+
+     "Hi there"[1] == "i"
+
+   There are other sequences, as well. All sequences in JavaScript, like
+   String, are _zero-based_, meaning their first element is element |0|.
+
+   A very common sequence type is the **Array**, typically created thus:
+
+     [1, 1, 2, 3, 5, 8]; // A 6-element array.
+     [];                 // An empty array.
+
+   If you look up Array in the JavaScript documentation, e.g., by looking up
+   "mdn javascript array" on your favorite search engine or using the
+   documentation links above, you will find that it has some useful properties.
+   You can get the length of an array by accessing |.length|, access and even
+   set its members using |[]|, add elements to the end using |.push|, join
+   elements together in a single String using |.join|, sort elements using
+   |.sort|, etc.
+
+   Exercises
+
+   - Look up the Array and see what kinds of functions and data elements it
+     provides: http://www.w3schools.com/js/js_arrays.asp . Don't worry about
+     reading and understanding all of it, just poke around there and in the JS
+     Arrays Methods section.
+
+   - Try setting setting values beyond the end of the array. What happens?
+
+   --
+
+   // Create an array:
+   var a = [7, 3, 1, 9];
+   _output(a);
+   _output("a has", a.length, "elements");
+
+   // Indexing works as expected.
+   _output("third element", a[2]);
+   _output("last element", a[a.length - 1]);
+
+   // Arrays are *mutable*: they can be changed in place.
+   a[3] = "hello";    // Change element 3.
+   _output(a);
+
+   // And you can push values onto the end
+   // of them, among many other things.
+   a.push("new value");
+   _output(a);
+
+   // Sorting is really useful.
+   a.sort();
+   _output("sorted", a);
+
+   // Joining into a string is another.
+   _output("joined", a.join("::"));
+
+   // You can also take "slices" of an array.
+   // What does this do?
+   _output("sliced", a.slice(1, 4));
+ </div>
+ <div name="Objects as Dictionaries (Maps)">
+   Up to this point, we have accessed the members of objects using dot
+   notation, e.g., |a.length|. As it happens, members of objects can also be
+   accessed and set using index notation: |a["length"]|. This makes the object
+   act like a _dictionary_ or a _map_, which is a data structure that maps keys
+   to values.
+
+   This is very useful when you just want to keep track of a bunch of **keys**
+   and **values**, and you don't necessarily know the keys beforehand.
+
+   An object that is suitable for use in this way can be created using |{}|:
+
+     {"name": "Mortimer", "age": 30}
+     {} // An empty object.
+
+   If the keys are valid JavaScript variable names, you can omit the quotes:
+
+     {name: "Fred", food: "pizza"}
+
+   To access these keys, you use indexing notation:
+
+     var a = {};
+     a["my key"] = 10;  // Set the value
+     a["my key"] == 10; // Test: true
+
+   Exercises
+
+   - Try setting your own key/value pairs and outputting your dictionary.
+
+   - Set a value with dot notation and print it with index notation.
+
+   - Read about the built-in JSON object at
+     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON
+
+   --
+
+   var things = {
+       "message": "something useless",
+       "name with spaces": 15.23,
+       3: "keys can be numbers"};
+
+   // Wait, what is this?
+   _output(things);
+
+   // We're getting ahead of ourselves here, but this is
+   // More likely what you expected to see:
+   _output("JSON output:", JSON.stringify(things, null, "  "));
+
+   _output("numeric index:", things[3]);
+   _output("dot notation:", things.message);
+   _output("spaces require indexing:", things["name with spaces"]);
+
+   // You can set values in this object, as well:
+   things["newval"] = "something completely different";
+   _output(JSON.stringify(things));
+ </div>
+ <div name="Cool Pictures, and Learning is Forever">
+   We just finished outlining the most important _data structures_ in
+   JavaScript: arrays and objects. We also know how to find and call functions.
+   This is a good time to take a breather and try to do something more
+   exciting.
+
+   Since we are working within a relatively modern browser (so long as it isn't
+   IE 8 or earlier), we have access to the HTML 5 **canvas** element. Let's do
+   something with one.
+
+   When drawing on 2-dimensional canvas, the coordinate system is a little
+   different than you might be used to. The upper-left corner is (0,0), and
+   the lower-right corner is at (width-1, height-1). You are probably used to
+   thinking of the y-coordinate as going the other direction, so this can take
+   some getting used to.
+
+   Take a look at the code in the code area. Note that _there are no new
+   JavaScript ideas_ represented there. Everything there is something you
+   already know how to do _with the language itself_. But it all looks
+   unfamiliar! How could you possibly have known to write exactly that code
+   to display some rectangles?
+
+   Even seasoned programmers spend a lot of time with documentation open in
+   front of them (I did that when creating this example, in fact!), because
+   there is no way to remember it all, and things are constantly changing. They
+   also spend a lot of their time **learning new things**, because every
+   situation demands a new bit of knowledge. In this case, that new bit of
+   knowledge is a bit of DOM manipulation and displaying stuff on a canvas.
+
+   So, take heart! Once you know the _syntax_ of JavaScript, you can not only
+   start grasping the vast _vocabulary_ of the language and its host
+   environment, you can also _create your own_. We'll get into that shortly.
+
+   Exercises
+
+   - Look up canvas functions and try some different shapes.
+     http://www.w3schools.com/tags/ref_canvas.asp
+
+   --
+
+   // Ask the DOM for the output window (where we have
+   // been showing our output up until now).
+   var container = document.getElementById("output");
+
+   // Create a new DOM object: a canvas. Add it.
+   var canvas = document.createElement("canvas");
+   canvas.width = 200;
+   canvas.height = 200;
+   canvas.style.border = "1px solid black";
+   container.appendChild(canvas);
+
+   // To draw on a canvas, you need a "context".
+   // We'll stick with a 2-dimensional context, here.
+   var ctx = canvas.getContext("2d");
+   ctx.fillStyle = "red";
+   ctx.fillRect(10, 10, 50, 50);
+   ctx.fillStyle = "blue";
+   ctx.fillRect(70, 30, 100, 150);
+ </div>
+ <div name="Making Functions">
+   You have already encountered a non-built-in function in these lessons:
+   |_output|. This is a function that I wrote to make it easy to see what is
+   going on without having to open an |alert| window. In the code window
+   you can see that we call |_output(_output)|. This basically instructs
+   the _output function to print a string version of itself. Check it out.
+
+   There is a lot in there that we haven't covered yet, and some stuff that is
+   specific to my use of AngularJS (http://angularjs.org/), so don't worry
+   about understanding it in depth right now.
+
+   The point is that _I made that_, and you can make your own functions, too.
+   To define your own function, we'll start with the named version:
+
+     function myFunc(a) {
+       // Your stuff goes here.
+     }
+
+   Defining a function is as simple as using the |function| keyword, giving it
+   a name, indicating what arguments it expects to receive (in the above case,
+   just one called |a|), and putting the **body** in curly brackets.
+
+   If you want to return a value other than |undefined| when the function is
+   called, use the |return| keyword. There are examples of this in the code
+   window.
+
+   Exercises
+
+   - Write a function that accepts two strings and returns them as one string
+     separated by ":". HINT: you know how to join strings using |+|, and you can
+     accept multiple arguments by separating them by commas in the function
+     definition like so |function name(arg1, arg2)|.
+
+   - Try the special |_canvas()| function that I provide with this tutorial to
+     get a context more easily. You can pass it an optional width and height if
+     you want.
+
+   --
+
+   // Let's peek inside, shall we?
+   _output(_output);
+
+   // Make your own!
+   function timesFifteen(x) {
+     return x * 15;
+   }
+   _output("3 times 15:", timesFifteen(3));
+
+   // Some functions don't need to return anything.
+   function myAlert(message) {
+     _output(message);
+     alert(message);
+   }
+
+   myAlert("alerts and displays");
+
+   // This is useful: make canvas creation easier:
+   function simpleCanvasContext() {
+     var container = document.getElementById("output");
+     var canvas = document.createElement("canvas");
+     canvas.width = 200;
+     canvas.height = 200;
+     canvas.style.border = "1px solid black";
+     container.appendChild(canvas);
+     return canvas.getContext("2d");
+   }
+
+   var ctx = simpleCanvasContext();
+   ctx.fillStyle = "green";
+   ctx.fillRect(40, 50, 60, 70);
+ </div>
+ <div name="If Only">
+   Programs are not very interesting if they always do the same thing and ignore
+   the state of the world around them. One important way to respond to outside
+   stuff is _conditionals_. The most common conditional is the *if statement*.
+
+     if (test) {
+       // Do stuff if "test" true.
+     } else {
+       // Do stuff if "test" is false.
+     }
+
+   The above is a basic |if else| structure. We encountered the _boolean
+   values_ **true** and **false** before, and now we can use them to change
+   the behavior of our programs. If the condition inside |()| evaluates to
+   **true**, then the first block executes, otherwise the second block
+   executes.
+
+   The |else| part is optional. You can omit it if you don't need it.
+
+   Exercises
+
+   - Write a function that displays a red rectangle if its argument is |true|,
+     and a blue rectangle otherwise.
+
+   - Read this short post on JavaScript _truthiness_:
+     http://james.padolsey.com/javascript/truthy-falsey/
+
+   --
+
+   function perkyBoolean(arg) {
+     if (arg) {
+       _output("Yes!");
+     } else {
+       _output("That's okay! I'm happy anyway!");
+     }
+   }
+
+   perkyBoolean(true);
+   perkyBoolean(false);
+
+   // Any boolean expression can be used in the if statement above.
+   perkyBoolean(10 == 5);
+   perkyBoolean(15 &gt; 12);
+
+   // If statements actually evaluate their condition
+   // in a *boolean context*. In a nutshell, this means
+   // that they try really hard to convert any value into
+   // a true or false before proceeding. This can have some
+   // surprising effects:
+   perkyBoolean("");  // false - empty string
+   perkyBoolean("0"); // true - non-empty string
+   perkyBoolean(0);   // false - numeric zero
+</div>
+ <div name="Introduction to Recursion">
+   Functions are really neat, and the ability to define your own changes
+   the game entirely. One thing that may not be obvious is that functions
+   can _call themselves_. When a function ends up calling itself, either
+   directly or indirectly, it is called _recursion_. Functions that do this
+   _recur_ (they do _not_ "recurse" -- that's what _I_ do when I hear that word
+   again and again).
+
+   Now that we have conditionals and composite data structures, we can pretty
+   much do anything we want to. The stuff that remains is icing and optimization.
+
+   Let's see if we can use this to add up all of the elements of an array:
+
+     var a = [2, 3, 5, 7, 11]; // Some primes
+     function sum(arr) {
+       if (arr.length == 0) {
+         return 0;
+       }
+       return arr[0] + sum(arr.slice(1));
+     }
+
+   Whoa. Do you see what we did there? An empty array is defined as having sum
+   of |0|. But a non-empty array is has the sum of its first element and the
+   sum of the rest of its elements. Seems logical, but does it work?
+
+   It turns out that it does! You can define functions that _depend on their
+   eventual definition_. This is an incredibly powerful concept, and as alluded
+   to earlier, is powerful enough that you don't need anything other than what
+   you have learned to do arbitrary things with computers.
+
+   If you want to understand how this works, think of it this way: when the
+   JavaScript interpreter encounters a function call (call that "inner") inside
+   of another function (call that "outer"), it suspends "outer" where the call
+   occurs, calls "inner", and then resumes "outer" where it left off with the
+   "inner" value where it belongs.
+
+   That's a lot of words to say "it does what you would pretty much expect, and
+   you can trust it".
+
+   Exercises
+
+   - Fix the use of |sum| when it is given strings. HINT: add an argument to
+     |sum| called |default| that specifies the "base case". If |default ===
+     undefined|, you can set it to 0 and proceed, otherwise use it in the right
+     place.
+
+   --
+
+   function sum(arr) {
+     if (arr.length == 0) {
+       return 0;
+     }
+     // Not specifying the second argument of slice
+     // implies "all the way to the end".
+     return arr[0] + sum(arr.slice(1));
+   }
+
+   _output(sum([1, 2, 3, 4, 5]));
+   _output(sum([2, 3, 5, 7, 11]));
+   _output(sum([1, 1, 1]));
+
+   // This *almost* works! What's wrong with it?
+   // The exercises invite you to fix it. Give it a try.
+   _output(sum(["hi", " ", "there", " folks!"]));
+
+   // This one creates an array with every integer up
+   // to but not including 'n' in it. How does it work?
+   function range(n) {
+     if (n == 0) {
+       return [];
+     }
+     // We could also just return
+     // range(n - 1).concat([n - 1]);
+     var a = range(n - 1);
+     a.push(n - 1);
+     return a;
+   }
+
+   _output(range(10));
+</div>
 </div>
 </body>
 </html>
