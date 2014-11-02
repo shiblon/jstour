@@ -228,7 +228,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
           $scope.canvas.width = width;
           $scope.canvas.height = height;
           $scope.canvas.style.border = "1px solid black";
-          container.appendChild($scope.canvas);
+          container.insertBefore($scope.canvas, container.firstChild);
         }
         if (!(width === undefined || width == null || width == $scope.canvas.width)) {
           $scope.canvas.width = width;
@@ -236,8 +236,28 @@ function CodeCtrl($scope, $http, $location, $timeout) {
         if (!(height === undefined || height == null || height == $scope.canvas.height)) {
           $scope.canvas.height = height;
         }
-        var ctx = $scope.canvas.getContext("2d");
-        return ctx;
+        return $scope.canvas;
+      };
+      var _canvas_window = function(width, height, name) {
+        if (name === undefined) {
+          name = "canvasWindow";
+        }
+        var win = window.open(null, name, "height=" + height + ",width=" + width);
+        var canvas = win.document.getElementById("_canvas_");
+
+        if (!canvas) {
+          var canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          canvas.id = "_canvas_";
+          win.document.body.appendChild(canvas);
+        }
+
+        return {
+          "window": win,
+          "canvas": canvas,
+          "context": canvas.getContext('2d'),
+        };
       };
       eval($scope.code);
     } catch(err) {

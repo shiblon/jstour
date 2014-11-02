@@ -819,7 +819,7 @@
       definition like so |function name(arg1, arg2)|.
 
     - Try the special |_canvas()| function that I provide with this tutorial to
-      get a context more easily. You can pass it an optional width and height if
+      get a canvas more easily. You can pass it an optional width and height if
       you want.
 
     --
@@ -842,17 +842,18 @@
     myAlert("alerts and displays");
 
     // This is useful: make canvas creation easier:
-    function simpleCanvasContext() {
+    function simpleCanvas() {
       var container = document.getElementById("output");
       var canvas = document.createElement("canvas");
       canvas.width = 200;
       canvas.height = 200;
       canvas.style.border = "1px solid black";
       container.appendChild(canvas);
-      return canvas.getContext("2d");
+      return canvas;
     }
 
-    var ctx = simpleCanvasContext();
+    var canvas = simpleCanvas();
+    var ctx = canvas.getContext('2d');
     ctx.fillStyle = "green";
     ctx.fillRect(40, 50, 60, 70);
   </div>
@@ -1485,6 +1486,408 @@
     c2("hello 2");
 
     c1("hi 1");
+  </div>
+  <div name="Canvas Review: Preparing for Games">
+    We now have enough knowledge to do just about anything. Let's start
+    building a simple game.
+
+    Games are interesting because they are fun, but they are also interesting
+    because they exercise so much of computer programming. You have to accept
+    input, process information at regular time intervals, display things on the
+    screen, and handle errors. They have a lot of moving parts!
+
+    But we can simplify things quite a bit. Let's start with displaying things
+    on the screen. Earlier we saw that you can create a |canvas| object and
+    draw on it. Let's remind ourselves of how that works here. We'll simplify
+    the process a bit by calling the special |_canvas| function designed
+    especially for this tutorial (note: if you want to see how it works, just
+    _output(_canvas) and read up!).
+
+    The code window gets the output canvas and draws on it.
+
+    Exercises
+
+    - Play around with the canvas. Look up the context drawing functions at
+      http://www.w3schools.com/tags/ref_canvas.asp and try drawing various shapes
+      of differing colors.
+
+    - Try using |save| and |restore|. These allow you to change things like
+      fillStyle, do some operations, then go right back to what it was before
+      you started.
+
+    - How would you clear the whole canvas using |clearRect|? What parameters
+      would you pass?
+
+    --
+
+    var canvas = _canvas(200, 200);
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = "#cfcfcf"; // red, green, blue in hexadecimal
+    ctx.strokeStyle = "#ff0000"; // as red as can be, no green or blue
+
+    ctx.fillRect(40, 40, 100, 100);
+    ctx.strokeRect(40, 40, 100, 100);
+
+    ctx.strokeRect(50, 50, 60, 60);
+  </div>
+  <div name="Opening a Window">
+    If we're going to make a game that accepts input, we'll need to graduate
+    from this stuffy little output window. We'll want to create a window that is
+    completely dedicated to the game.
+
+    We do this using the DOM, specifically, the |window.open| function:
+
+      window.open(url, windowName, spec);
+
+    We won't be specifying a URL, and the name of the window doesn't much
+    matter, but we do want to tell it how big to be, so we'll use the spec:
+
+      window.open(null, null, "height=200,width=200");
+
+    Once we do open a window, we can then access all kinds of stuff within it.
+    For example, every window has a |document|, and every |document| has a
+    |body|. We can write to that body, and we can add elements, including a
+    |canvas| element, to it.
+
+    We do exactly that in the code window.
+
+    Exercises
+
+    - Remove the "innerHTML" setting. What happened?
+
+    - When you run the code, click back on this window and run it again.
+      It opens a new window again! Make it open the *same* window again by
+      giving the window a name in |window.open|.
+
+    - Now when you run the code, click away and run it again, |w| is a
+      reference to that original window. But it dosen't come to the front when
+      you do that. Add a |w.focus()| call after |window.open| to make the window
+      come forward when you run the code again.
+
+    --
+
+    // Open a window, put some text in it, get rid of margins.
+    var w = window.open(null, null, "height=200,width=200");
+    w.document.body.style.margin = "0";
+    w.document.body.innerHTML = "Hello game world!";
+
+    // Create a canvas and add it to the new window.
+    var canvas = document.createElement('canvas');
+    canvas.width = 200;
+    canvas.height = 200;
+    canvas.style.border = "1px solid black";
+
+    w.document.body.appendChild(canvas);
+
+    // Draw in the new window's canvas!
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = "red";
+    ctx.fillRect(20, 20, 50, 50);
+
+  </div>
+  <div name="Random Rectangles, Random Colors">
+    Often we want to make things a little more exciting. For that, randomness
+    is useful.
+
+    To get a pseudo-random number in JavaScript, use the |Math.random|
+    function. It returns a number between |0.0| (inclusive) and |1.0|
+    (exclusive). Let's see if we can use it to create random rectangle corners.
+
+    Note that we pull a nifty trick to get random colors. Because colors are
+    just integers in the range 0 (000000 hex) to 16777215 (FFFFFF hex), we can
+    create a random number in that range and get a valid color.
+
+    As a quick reminder, hexadecimal is a number base with the digits |0| through
+    |f|. There are 16 of them, so |f| is |15| in decimal. If you were counting
+    in hex, you would count like this:
+
+      0 1 2 3 4 5 6 7 8 9 a b c d e f 10 11 12 ...
+
+    Thus, every two hex digits represents 256 values (in decimal, two digits
+    represents 100 values). You can assign a value from 0 (black) to 255
+    (maximum brightness) to each of red, green, and blue to get a color
+    mixture. Prefix it with "#", and the DOM knows exactly how to display it.
+    The |toString| method of all Numbers accepts an optional base, which we
+    give as |16|, indicating hexadecimal.
+
+    Exercises
+
+    - Fix this code so that every time it is run, the canvas is cleared before
+      the new rectangle is built.
+
+    --
+
+    // Let's just define these once, this time.
+    // When making constants this way, it is
+    // customary to use ALL_CAPS.
+    var WIDTH = 200;
+    var HEIGHT = 200;
+
+    var RECT_WIDTH = 20;
+    var RECT_HEIGHT = 20;
+
+
+    var x = WIDTH * Math.random();
+    var y = HEIGHT * Math.random();
+
+    var c = _canvas(WIDTH, HEIGHT);
+    var ctx = c.getContext('2d');
+
+    // Let's mix up the colors, shall we? We can use any
+    // valid integer from 0 (black) to 0xFFFFFF (white,
+    // also the maximum color value 16777215) to represent
+    // the RGB color.
+    ctx.fillStyle = "#" + Math.floor(Math.random() * 0x1000000).toString(16);
+
+    ctx.fillRect(x, y, RECT_WIDTH, RECT_HEIGHT);
+  </div>
+  <div name="Animation Frames">
+    With canvases, new widows, and loops, we can start doing animation.
+    Animation is just displaying a series of images fast enough that our brains
+    are fooled into seeing motion.
+
+    That seems pretty easy, right? You might think that the following would work:
+
+      while(game_should_run()) {
+        draw_stuff();
+        delay_a_teeny_bit();
+      }
+
+    In DOM JavaScript, however, that won't work, though you are welcome to try
+    it. The problem is that the loop never "gives up" control back to the
+    browser, so the browser can't display the changes made to the canvas.
+
+    Not all languages and environments have this limitation, but JavaScript in
+    the browser definitely does. What we need instead is to get the browser to
+    call on _us_ periodically to draw stuff. We need a **timer**.
+
+    There are several ways to get a timer in the DOM:
+
+      window.setTimeout(func, duration_milliseconds);
+      window.setInterval(func, duration_milliseconds);
+      window.requestAnimationFrame(func);
+
+    The first two are older than the last one, and work in more browsers, but
+    they are discouraged in modern settings because they are somewhat
+    unreliable. For animation, we want to use |requestAnimationFrame|. We pass
+    it a function of our own making. That function accepts a "timestamp"
+    parameter that is a time in milliseconds. The next time the browser
+    repaints, it calls our function once and promptly forgets about it.
+
+    Exercise
+
+    - The code in the code window only shows a single rectangle, and the
+      animation frame is only requested once. Request another animation frame
+      from within |step| to make it keep geneating rectangles.
+
+    --
+
+    var WIDTH = 200;
+    var HEIGHT = 200;
+    var canvas = _canvas(WIDTH, HEIGHT);
+    var context = canvas.getContext('2d');
+
+    // This function just outputs a random rectangle.
+    function step(timestamp) {
+      context.fillStyle = "#" + Math.floor(Math.random() * 0x1000000).toString(16);
+      context.fillRect(Math.random() * WIDTH, Math.random() * HEIGHT, 30, 30);
+    }
+
+    window.requestAnimationFrame(step);
+  </div>
+  <div name="Controlled Animation Intervals">
+    When we made the previous example display lots of rectangles, we didn't
+    have much control over how often it did that. They just came as fast as
+    they possibly could. That's nice for a demo, but it won't help much if we
+    want to make a game. We need more control.
+
+    The function registered with |requestAnimationFrame| accepts a timestamp
+    argument, given in milliseconds. We can use that to get a little more
+    control of things.
+
+    To do so, we'll want to keep track of some state. We'll need to know when
+    the animation first started, and we'll want to keep track of the next
+    allowed drawing time. To do this, we'll make use of a new kind of operator:
+    the *increment-assignment operator* |+=|, e.g.,
+
+      a += 10;
+
+    This is exactly equivalent to |a = a + 10;|, but is more convenient in some
+    respects (and it can be made to run a bit faster).
+
+    When |step| first runs, it notes that it has never run before beacuse it
+    doesn't have a |first_draw| time. Then, before drawing, it checks to see
+    that |timestamp| has passed |next_draw|. If not, it just requests a new
+    animation frame and returns.
+
+    If it has passed the time to draw again, however, then it draws. It also
+    calculates a new |next_draw| time by adding |DURATION| to the existing one.
+    This way we |next_draw| marches by one second at a time, forever.
+
+    Exercises
+
+    - Change the |DURATION| to be faster or slower.
+
+    - What happens if you set |next_draw| to |timestamp + DURATION| instead of
+    just adding |DURATION| to it? HINT: try using |_output(next_draw)| inside
+    of |step|. See how it changes with the two different strategies.
+
+    --
+
+    var WIDTH = 200;
+    var HEIGHT = 200;
+
+    var DURATION = 1000; // one rectangle per second
+
+    // These keep track of timing so that we get draws as close to 1 second
+    // apart as possible.
+    var first_draw = null;
+    var next_draw = null;
+
+    var canvas = _canvas(WIDTH, HEIGHT);
+    var context = canvas.getContext('2d');
+
+    // This function just outputs a random rectangle.
+    function step(timestamp) {
+      // First time? Remember this moment, and make sure we draw something.
+      if (first_draw == null) {
+        first_draw = timestamp;
+        next_draw = first_draw;
+      }
+      // If we are ready to draw, go ahead and do it.
+      if (timestamp &gt;= next_draw) {
+        context.fillStyle = "#" + Math.floor(Math.random() * 0x1000000).toString(16);
+        context.fillRect(Math.random() * WIDTH, Math.random() * HEIGHT, 30, 30);
+        // Don't forget to set a new "next_draw" time.
+        next_draw += DURATION;
+      }
+      window.requestAnimationFrame(step);
+    }
+
+    window.requestAnimationFrame(step);
+  </div>
+  <div name="Animation With Closures">
+    We are using a lot of global variables in our animations. That is fine for
+    small demonstrations, but will end up being an issue as programs get
+    larger. If everything you do requires a new little bit of state, you'll
+    have a ton of these variables. And they all have to have unique names.
+
+    Far better is to use a closure to keep these things more compartmentalized.
+    The code window illustrates this concept. The |step| function is defined inside
+    of |run_demo|, and therefore it has access to all of the variables defined
+    inside it.
+
+    But outside of |run_demo|, none of these variables exist. Furthermore, all
+    of the animation functionality is now in one place: you could write this
+    function, stick it in a library somewhere, and anyone else could easily
+    call it without having to know exactly what order the steps are to make
+    things work. Before, we had to know that |tep| was an animation function,
+    and to start things off by using |requestAnimationFrame|. Now, we just have
+    to call |run_demo|.
+
+    This is related to a technique that is used just about everywhere on the
+    web. If you open up a web site debugger (e.g., by using "Inspect Element"
+    in the Chrome right-click menu), you can see source files for JavaScript
+    used by various sites. Many times you will see an anonymous function
+    declared and immediately called like this:
+
+      (function() {
+        // do lots of stuff with variables
+      })();
+
+    This allows all of the variables defined in that function to not "leak"
+    into the surrounding scope. We aren't using _precisely_ that technique
+    here, but the idea is the same.
+
+    Exercise
+
+    - Try putting _output(t0) after |run_demo|. What happens? Why?
+
+    --
+
+    function run_demo(width, height, duration) {
+      var canvas = _canvas(width, height);
+      var ctx = canvas.getContext('2d');
+
+      var t0 = null;
+      var t_next = null;
+
+      // Look, ma! "step" is now a closure!
+      function step(ts) {
+        if (t0 == null) {
+          t0 = ts;
+          t_next = ts;
+        }
+
+        if (ts &gt;= t_next) {
+          ctx.fillStyle = "#" + Math.floor(Math.random() * 0x1000000).toString(16);
+          ctx.fillRect(Math.random() * width, Math.random() * height, 30, 30);
+          t_next += duration;
+        }
+        window.requestAnimationFrame(step);
+      }
+
+      // Start running the demo.
+      window.requestAnimationFrame(step);
+    }
+
+    run_demo(200, 200, 350);
+  </div>
+  <div name="Animation in a Window">
+    Let's move this animation to its own window. Remember this little dance?
+
+      var win = window.open(null, name, spec);
+      win.focus();
+
+      var canvas = document.createElement('canvas');
+      canvas.width = WIDTH;
+      canvas.height = HEIGHT;
+      win.document.body.appendChild(canvas);
+
+    This tutorial has packaged that boilerplate into a function called
+    |_canvas_window(width, height, name)|. You can see how it works by using
+    |_output(_canvas_window)|. You'll notice that it does a bit more than the
+    above, including re-using existing elements if they are already there.
+
+    It returns an object with some useful members:
+
+    - window: the window object either created or brought forward
+    - canvas: the canvas object to draw on
+    - context: the context to use for drawing
+
+    The code window has the animation in it, but this time using the
+    |_canvas_window| function.
+
+    --
+
+    function run_demo(width, height, duration) {
+      var win_info = _canvas_window(width, height);
+      var ctx = win_info.context;
+
+      var t0 = null;
+      var t_next = null;
+
+      // Look, ma! "step" is now a closure!
+      function step(ts) {
+        if (t0 == null) {
+          t0 = ts;
+          t_next = ts;
+        }
+
+        if (ts &gt;= t_next) {
+          ctx.fillStyle = "#" + Math.floor(Math.random() * 0x1000000).toString(16);
+          ctx.fillRect(Math.random() * width, Math.random() * height, 30, 30);
+          t_next += duration;
+        }
+        window.requestAnimationFrame(step);
+      }
+
+      // Start running the demo.
+      window.requestAnimationFrame(step);
+    }
+
+    run_demo(200, 200, 350);
   </div>
 </div>
 </body>
