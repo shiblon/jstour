@@ -1147,9 +1147,78 @@
       _output("  ", k, o[k]);
     }
   </div>
-  <div name="Loops and Recursion Working Together">
-    Let's talk about sorting. If you were to imagine a simple sorting
-    algorithm, you might come up with the following:
+  <div name="Boolean operators">
+    As we work more with loops and conditionals, we'll be using boolean operators.
+    Recall that JavaScript's truthiness means "if it isn't |""|, |0|, |null|, |undefined|, or
+    |false|, it's considered true".
+
+    There are three very common and important boolean operations that we need to
+    cover: |!|, ##||##, and |&amp;&amp;|.
+
+    |!| is boolean "not" (inverse):
+
+      !false == true
+      !true == false
+
+    |&amp;&amp;| is boolean "and" (conjunction):
+
+      false &amp;&amp; false == false
+      false &amp;&amp; true == false
+      true &amp;&amp; false == false
+      true &amp;&amp; true == true
+
+    ##||## is boolean "or" (disjunction):
+
+      false &amp;&amp; false == false
+      false &amp;&amp; true == true
+      true &amp;&amp; false == true
+      true &amp;&amp; true == true
+
+    Note that with these last two, there is an important caveat: if both values
+    are truthy, |&amp;&amp;| returns **the second value** (not just |true|).
+
+    Similarly, ##||## returns **the first truthy value**. Examples of this are
+    in the code window.
+
+    Exercises
+
+    - Play around with the "returns second value" nature of |&amp;&amp;|.
+
+    --
+
+    // Boolean AND:
+    _output("f and f =", false &amp;&amp; false);
+    _output("f and t =", false &amp;&amp; true);
+    _output("t and f =", true &amp;&amp; false);
+    _output("t and t =", true &amp;&amp; true);
+
+    // Spacer
+    _output();
+
+    // Boolean OR:
+    _output("f or f =", false || false);
+    _output("f or t =", false || true);
+    _output("t or f =", true || false);
+    _output("t or t =", true || true);
+
+    _output();
+
+    var a = null;
+    // Since 'a' is null, b gets the next value.
+    var b = a || "hello";
+    // Since 'b' is not null, c gets b.
+    var c = b || "hi";
+
+    _output("a", a);
+    _output("b", b);
+    _output("c", c);
+  </div>
+  <div name="Checkpoint: Sorting with Loops and Recursion">
+    It's time to apply what we have learned. If anything in this chapter is
+    unclear, this would be a great time to go back and review.
+
+    With that, let's talk about sorting. If you were to imagine a simple
+    sorting algorithm, you might come up with the following:
 
     - Find the smallest element of the array,
 
@@ -1158,42 +1227,67 @@
     - Do it all again with the next non-sorted element until finished.
 
     This is called a _selection sort_, and it is indeed simple and effective.
-    It is also really slow because you have to go over every unsorted element
-    of the array to get the right value in one spot. That means you do |(n *
-    (n+1) / 2)| steps. Let's call that |(n*n)| to make things simple.
+    It is also fairly slow: every element that goes into it's correct location
+    requires a scan of the remaining elements. This is basically quadratic
+    behavior (for a list of size |n|, it takes about |n*n| steps).
 
-    What if you tried a _divide and conquer_ approach like **Quicksort**? Here's how it works:
+    What if you tried a _divide and conquer_ approach like **Quicksort**
+    instead? Here's how it works:
 
     - Divide the list into two pieces, one where everything is bigger than the
       first element, and one where every element is smaller (or equal).
 
     - Sort those two pieces and recombine them.
 
-    This is better. If you sort two lists of roughly half the size using
-    selection sort, you end up doing |2 * ((n/2) * (n/2))| work for each of them,
-    which comes out to be half the work you would have done had you just used
-    the selection sort. Not bad! Let's do it again, splitting each smaller list
-    into half and sorting *those*. Well, we just cut our total work in half
-    again. Each time we split before sorting, we cut the effective work in
-    half. That's pretty neat, and it turns out that the total work you do is
-    roughly |n * log(n)|, a huge savings in effort and time.
+    This is better. A list half the size can take 1/4 the steps to selection
+    sort. Cutting the list in half over and over again means that we never have
+    to do the selection sort at all: eventually we end up with tiny
+    already-sorted lists. The work done is |n * log(n)| for this algorithm.
 
-    Let's look at an implementation of Quicksort in the code window. It makes
-    use of loops, variables, conditionals, and recursion, which makes it a very
-    nice way to summarize what we have learned so far.
+    Implementations of both sorts are provided in the code window.
 
     Exercises
 
-    - Try turning the explanation above into a picture of what is going on. It
+    - Spend some time understanding all of the code in the code window. Don't
+      worry, it's less than it appears! Also, note that absolutely none of it
+      is new at this point. You have learned every concept displayed there.
+      If some of it seems unfamiliar, go ahead and review a few concepts. The
+      rest of the tutorial will assume that you are comfortable with this slide.
+
+    - Try turning the explanations above into pictures of what is going on. It
       might help to draw an array somehow and label pieces of it, then step
       through the idea on paper.
+
+    - Check out these animations of various sorting algorithms. The ones we
+      have looked at are "Selection" and "Quick":
+      http://www.sorting-algorithms.com/
 
     - Try removing all of the comments and see how small the algorithm really is.
 
     --
 
-    // Don't worry! This looks like a lot, but it is
-    // mostly comments.
+    // These will be helpful in counting how much
+    // work each algorithm does.
+    var selection_compare_count = 0;
+    var qsort_compare_count = 0;
+
+    function selection_sort(arr) {
+      var len = arr.length;
+      for (var end_of_sorted = 0; end_of_sorted &lt; len; end_of_sorted++) {
+        // Find the smallest value in the unsorted part.
+        var smallest_position = end_of_sorted;
+        for (var i = end_of_sorted + 1; i &lt; len; i++) {
+          selection_compare_count++; // let's see how much work we did.
+          if (arr[i] &lt; arr[smallest_position]) {
+            smallest_position = i;
+          }
+        }
+        // Now we know where the smallest value is: swap.
+        var temp = arr[smallest_position];
+        arr[smallest_position] = arr[end_of_sorted];
+        arr[end_of_sorted] = temp;
+      }
+    }
 
     // When implementing recursive algorithms, this
     // is a common pattern: a main function that acts
@@ -1203,7 +1297,8 @@
       _qsort_helper(arr, 0, arr.length);
     }
 
-    // This is the real worker, the recursive part that calls itself.
+    // This is the real worker, the recursive part that calls itself
+    // with different sections of the array.
     function _qsort_helper(arr, start, end) {
       // Here is our basis case: an array with 1 or fewer
       // elements is trivially already sorted, so we're done.
@@ -1230,6 +1325,7 @@
       // and advance the position.
       var start_of_larger = start + 1;
       for (var i = start_of_larger; i &lt; end; i++) {
+        qsort_compare_count++; // let's see how much work we did.
         if (arr[i] &lt; mid) {
           if (i != start_of_larger) {
             // Found one not already in the right place.
@@ -1261,11 +1357,135 @@
     }
 
     // Let's try it out!
-    var a = [5, 2, 6, 3, 9, 10, 22, 5, 1, 3, 0.1, -3];
+    var a = [5, 2, 6, 3, 9, 10, 22, 5, 1, 3, 0.1, -3,
+             23, -5, 28, 8, 11, 19, 33, 27, 13, 18];
+    var b = a.slice(0); // Create a copy of a.
 
-    qsort(a);
-    _output(a);
- </div>
+    selection_compare_count = 0; // reset before running
+    selection_sort(a);
+    _output("selection sort (" + selection_compare_count + " comparisons):", a);
+
+    qsort_compare_count = 0; // reset before running
+    qsort(b);
+    _output("quicksort (" + qsort_compare_count + " comparisons):", b);
+
+  </div>
+  <div name="Function Arguments">
+    So far we have mostly focused on functions that take a fixed number of
+    arguments. We have seen an example or two where you can *omit* arguments
+    when calling a function, and they will take on the value **undefined**
+    within it.
+
+    It turns out that you can have a function accept an *arbitrary* number
+    of arguments, as well, by using the special |arguments| sequence within a
+    function. You may have noticed that the implementation of |_output| uses
+    this trick (try running |_output(_output)| again and take a look).
+
+    Check out the code window for examples of how function arguments work.
+    Also, this is worth reading: http://www.w3schools.com/js/js_function_parameters.asp.
+
+    Exercises
+
+    - Write a function like |_output| that joins an arbitrary number of
+      arguments together into a string, with ':' as the separator.
+
+    --
+
+    // Functions can have trailing arguments omitted, or
+    // explicitly set to undefined:
+    function fixed(a1, a2, a3) {
+      _output("a1:", a1, "a2:", a2, "a3:", a3);
+    }
+
+    // Omitting trailing arguments:
+    fixed("hi");
+    fixed("hi", "there");
+
+    // Specifying some as undefined:
+    fixed(undefined, "and", "stuff");
+
+    // You can send more than was asked for, but the extras
+    // are simply ignored.
+    fixed(1, 2, 3, 4, 5);
+
+    // Functions can take arbitrary arguments:
+    function arbitrary(a1, a2, a3) {
+      _output("arbitrary a1:", a1, "a2:", a2, "a3:", a3);
+      // Note that even though we name a1, a2, and a3, they are repeated
+      // in the arguments sequence. For this reason, functions that use
+      // it don't typically have any listed in the header.
+      for (var i = 0, len = arguments.length; i &lt; len; i++) {
+        _output("  arg " + i + ":", arguments[i]);
+      }
+    }
+
+    arbitrary("hey", "there");
+    arbitrary("1", "2", "3", "4", "5");
+  </div>
+  <div name="Functions are Closures">
+    Functions in JavaScript are **closures**. This is a rather technical term,
+    but the concept is fairly simple. The idea is that while a function can
+    access the variables and arguments defined _inside_ of it, it can also
+    access the variables defined _globally_ and _in the surrounding scope_.
+
+    It helps to remember that functions are objects, just like everything
+    else in JavaScript, and they can therefore be assigned to variables and
+    passesd around and everything. In fact, you can create a function using a
+    **function expression**: a nameless function that is created on the fly:
+
+      var myFuncVar = function(arg1, arg2) {
+        // do stuff here
+      };
+
+    The code window shows an example of how this works. Though there is not
+    much code there, it will likely take a little bit of time to fully
+    understand what is going on. It helps to think of it this way: when a
+    function is _defined_, JavaScript packages up all of the environment around
+    that function and allows that function to access and change that
+    environment any time it is _called_ later on.
+
+    Exercises
+
+    - Remember the global counter variables we used in the quicksort slide a
+      little while ago? Go back and see if you can move them into a closure
+      instead. HINT: once you do this properly, you won't have to reset them
+      before sorting anymore - that will happen inside the sort function (which
+      will declare the counter, create a closure that uses it, call it, and
+      return the count).
+
+    --
+
+    // This function makes a new function and returns it.
+    function make_a_closure(a, b) {
+      var inside_counter = 0;
+      // Here we create a function without a name.
+      // See how we just say "name = function(args)"?
+      var f = function(message) {
+        // We can access this because it's in the surrounding
+        // scope. What's more, it belongs to the function
+        // *definition*, so it lives longer than this function call.
+        inside_counter++;
+        _output("f (count " + inside_counter + "): " +
+                "a", a, "b", b, "message", message);
+      }; // note the semicolon: this is the end of a variable assignment
+      // "f" is just an object that happens to
+      // be a function, so we create it here and return it.
+      return f;
+    }
+
+    var c1 = make_a_closure("a1", "b1");
+    var c2 = make_a_closure("a2", "b2");
+
+    // Watch what happens to the counter.
+    c1("hi 1");
+    c1("hi 1");
+    c1("hi 1");
+
+    c2("hello 2");
+    c2("hello 2");
+
+    c1("hi 1");
+  </div>
 </div>
 </body>
 </html>

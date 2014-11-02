@@ -8,13 +8,14 @@ angular.module('runcodeFilters', []).
       // Note the use of [\s\S] to get around the fact that javascript does
       // not have a "dotall" flag.
       paragraph = paragraph.replace(
-        /(^|\W)(\||_|\*{1,2})(\S|\S[\s\S]*?\S)\2(?=\W|$)/mg,
+        /(^|\W)(\||##|_|\*{1,2})(\S|\S[\s\S]*?\S)\2(?=\W|$)/mg,
         function(_, leader, delimiter, content) {
           tag = {
             '_': function(x) {return "<em>" + x + "</em>";},
             '*': function(x) {return "<strong>" + x + "</strong>";},
             '**': function(x) {return "<em><strong>" + x + "</strong></em>";},
             '|': function(x) {return '<span class=code>' + x + '</span>';},
+            '##': function(x) {return '<span class=code>' + x + '</span>';},
           }[delimiter];
           return leader + tag(content);
         });
