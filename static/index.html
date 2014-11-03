@@ -1910,6 +1910,171 @@
     // TODO: uncomment this after "stop" is returned from run_demo.
     // window.setTimeout(stop, 5000);
   </div>
+  <div name="Refactoring Useful Abstractions">
+    The |step| function we have been using seems like something we would want
+    to write over and over again, for every kind of animation we want to do.
+    Similarly, we keep drawing rectangles, but we do a lot of the same stuff
+    over and over again. Let's make this a bit simpler by *abstracting* these
+    concepts into some functions. While we're at it, we'll make it easy to
+    draw circles.
+
+    The code window now has three new functions:
+
+      animation_loop
+      fill_rect
+      fill_circle
+
+    If you look at |run_demo| now, it is much more straightforward. You specify
+    the drawing function and pass it to the animation loop and you're done.
+    Within the drawing function we're now just calling simple rectangle and
+    drawing functions, as well.
+
+    Exercises
+
+    - Instead of defining a function named |draw| and passing that name into
+      |animation_loop|, pass an **anonymous** fnction into |animation_loop|
+      directly, e.g., |animation_loop(function(ts) { /* stuff here */ })|. This
+      is a very common idiom that you will start to see more of.
+
+    - Implement the "once-per-duration" logic from previous slides, but inside
+      of the |draw| function. Add the |duration| argument back to |run_demo|.
+
+    - These functions will be available in future slides as
+      |_animation_loop|, |_fill_rect|, and |_fill_circle|, respectively.
+      The implementation of |_animation_loop| also sends the amount of time that
+      has **passed** to its drawing function, as the second argument. Try it out.
+
+    --
+
+    // If drawFunc returns false, this loop will stop.
+    function animation_loop(drawFunc) {
+      function step(ts) {
+        // We explicitly check for "false" here because it
+        // makes this more friendly to use. If you don't
+        // return *anything*, it is assumed you wanted to
+        // loop (because undefined !== false).
+        if (drawFunc(ts) !== false) {
+          requestAnimationFrame(step);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function fill_rect(context, x, y, w, h, color) {
+      // Since this is in a function, we want to
+      // leave things the way we found them. Nobody
+      // would expect to call this and have the global
+      // fill style suddenly changed.
+      context.save();
+      context.fillStyle = color;
+      context.fillRect(x, y, w, h);
+      context.restore();
+    }
+
+    // This is bit less obvious, and that makes it
+    // even more sensible to make a function for it.
+    function fill_circle(context, x, y, radius, color) {
+      context.save()
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2, true);
+      context.fill();
+      context.restore();
+    }
+
+    var RW = 30;
+    var RH = 30;
+
+    function run_demo(width, height) {
+      var wc = _canvas_window(width, height);
+      // Let's create a basic drawing function.
+      function draw(ts) {
+        var color = Math.floor(Math.random() * 0x1000000).toString(16);
+        var x = Math.random() * (width - RW);
+        var y = Math.random() * (height - RH);
+        // draw raindrop-like things.
+        fill_rect(wc.context, x, y, RW, RH, "#" + color);
+        fill_circle(wc.context, x, y, RW, "#" + color);
+        return true; // Otherwise it will only run once.
+      }
+
+      // Let's run our animation loop!
+      animation_loop(draw);
+    }
+
+    run_demo(500, 500);
+  </div>
+  <div name="Animating Motion">
+    We have a nice animation loop, and we have simple functions for drawing
+    circles and rectangles. Let's make something look like it's moving.
+
+    To animate something, we need to draw still frames fast enough to trick the
+    brain into seeing motion. We have the fast-drawing part down, now we just
+    need to make things behave as though they are moving.
+
+    Let's start by making a circle bounce around on the canvas. To do this, we
+    need to keep track of the circle's current position, we need a notion of
+    speed, and we have to know when to make it change direction (bounce). To
+    make this work, we'll create an object that contains information about the
+    circle.
+
+    Exercises
+
+    - You probably noticed right away that this just smears a circle across the
+      canvas. To animate it, you'll need to clear the canvas before drawing a
+      circle using clearRect. Do that.
+
+    - The next thing you might have noticed is that the circle does not bounce
+      off the left side. Make that happen.
+
+    - Make the circle change size over time, following a sinusoidal function.
+      You could, for example, use the previously-ignored |ts| parameter and
+      draw the radius as |radius * (Math.sin(ts) + 1) / 2|. Experiment with this.
+
+    - You might notice that bouncing doesn't look right, now. Move |radius|
+      into the circle's state and make sure bounces test against that value.
+
+    - Make the circle move in the y direction, as well. You'll need to keep
+      track of two speeds.
+
+    --
+
+    function run_demo(width, height, radius, color) {
+      var canvas = _canvas(width, height);
+      var ctx = canvas.getContext('2d');
+
+      var SPEED = 100;
+
+      var circle = {
+        'x': radius,
+        'speed': SPEED, // pixels per second
+      };
+
+      // It is customary to use the variable '_' to mean "we're ignoring this".
+      // Here we're making use of the fact that _animation_loop passes both the
+      // absolute animation time *and* the time since last animation to us.
+      function draw(_, delta_t) {
+        // Time difference is in milliseconds, so we divide by 1000 to get seconds:
+        var ds = delta_t / 1000;
+        // Compute the new x position using speed:
+        circle.x += ds * circle.speed;
+        _output(circle.x);
+
+        // Here we want to detect a collision and "bounce".
+        if (circle.x &gt;= (width - radius)) {
+          circle.x = (width - radius);
+          circle.speed = -SPEED;
+        }
+
+        // All calculated - time to draw it!
+        _fill_circle(ctx, circle.x, height / 2, radius, color);
+      }
+
+      _animation_loop(draw);
+    }
+
+    run_demo(400, 200, 20, "red");
+  </div>
 </div>
 </body>
 </html>

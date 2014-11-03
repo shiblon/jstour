@@ -198,7 +198,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     $scope.saveCode();  // Also forces dirty bit recomputation.
     $timeout(function(){
       $scope._time = new Date();
-    }, 5000);
+    }, 1000);
   });
 
   $scope.runCode = function() {
@@ -211,33 +211,36 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       $scope.addOutputText(args.join(" "));
     };
     var _canvas = function(width, height) {
-      if ($scope.canvas == null) {
+      var canvas = document.getElementById("_canvas");
+      if (!canvas) {
         var container = document.getElementById("output");
-        $scope.canvas = document.createElement("canvas");
+        canvas = document.createElement("canvas");
         if (width === undefined) {
           width = 200;
         }
         if (height === undefined) {
           height = 200;
         }
-        $scope.canvas.width = width;
-        $scope.canvas.height = height;
-        $scope.canvas.style.border = "1px solid black";
-        container.insertBefore($scope.canvas, container.firstChild);
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.border = "1px solid black";
+        container.insertBefore(canvas, container.firstChild);
       }
-      if (!(width === undefined || width == null || width == $scope.canvas.width)) {
-        $scope.canvas.width = width;
+      if (!(width === undefined || width == null || width == canvas.width)) {
+        canvas.width = width;
       }
-      if (!(height === undefined || height == null || height == $scope.canvas.height)) {
-        $scope.canvas.height = height;
+      if (!(height === undefined || height == null || height == canvas.height)) {
+        canvas.height = height;
       }
-      return $scope.canvas;
+      return canvas;
     };
     var _canvas_window = function(width, height, name) {
       if (name === undefined) {
         name = "canvasWindow";
       }
       var win = window.open(null, name, "height=" + height + ",width=" + width);
+      win.document.body.style.margin = "0";
+      win.document.body.style.padding = "0";
       var canvas = win.document.getElementById("_canvas_");
 
       if (!canvas) {
@@ -254,10 +257,43 @@ function CodeCtrl($scope, $http, $location, $timeout) {
         "context": canvas.getContext('2d'),
       };
     };
+    var _animation_loop = function(callback) {
+      var last_ts = null;
+      function step(ts) {
+        if (last_ts == null) {
+          last_ts = ts;
+        }
+        if (callback(ts, ts - last_ts) !== false) {
+          requestAnimationFrame(step);
+          last_ts = ts;
+        }
+      }
+      requestAnimationFrame(step);
+    };
+    var _fill_rect = function(context, x, y, w, h, color) {
+      // Since this is in a function, we want to
+      // leave things the way we found them. Nobody
+      // would expect to call this and have the global
+      // fill style suddenly changed.
+      context.save();
+      context.fillStyle = color;
+      context.fillRect(x, y, w, h);
+      context.restore();
+    };
+    var _fill_circle = function(context, x, y, radius, color) {
+      context.save()
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2, true);
+      context.fill();
+      context.restore();
+    };
     try {
       eval($scope.code);
     } catch(err) {
       $scope.addErrorText("" + err);
+      console.log("caught an error");
+      console.log(err);
     }
   };
 
