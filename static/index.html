@@ -726,7 +726,7 @@
     things["newval"] = "something completely different";
     _output(JSON.stringify(things));
   </div>
-  <div name="Cool Pictures, and Learning is Forever">
+  <div name="Checkpoint: Cool Pictures, and Learning is Forever">
     We just finished outlining the most important _data structures_ in
     JavaScript: arrays and objects. We also know how to find and call functions.
     This is a good time to take a breather and try to do something more
@@ -863,7 +863,7 @@
     stuff is _conditionals_. The most common conditional is the *if statement*.
 
       if (test) {
-        // Do stuff if "test" true.
+        // Do stuff if "test" is true.
       } else {
         // Do stuff if "test" is false.
       }
@@ -1223,27 +1223,27 @@
 
     - Find the smallest element of the array,
 
-    - Swap it with the first non-sorted element, and
+    - Sort the rest of the array and add the smallest element to the beginning.
 
-    - Do it all again with the next non-sorted element until finished.
+    This is called a **selection sort**, and it is indeed simple and effective.
+    It is also fairly slow: every element that goes into its correct location
+    requires finding the smallest of the remaining elements by checking them
+    all in turn. This is basically quadratic behavior (for a list of size |n|,
+    it takes about |n*n| steps).
 
-    This is called a _selection sort_, and it is indeed simple and effective.
-    It is also fairly slow: every element that goes into it's correct location
-    requires a scan of the remaining elements. This is basically quadratic
-    behavior (for a list of size |n|, it takes about |n*n| steps).
-
-    What if you tried a _divide and conquer_ approach like **Quicksort**
+    What if you tried a _divide and conquer_ approach like **mergesort**
     instead? Here's how it works:
 
-    - Divide the list into two pieces, one where everything is bigger than the
-      first element, and one where every element is smaller (or equal).
+    - Divide the array into two pieces.
 
-    - Sort those two pieces and recombine them.
+    - Sort both pieces.
 
-    This is better. A list half the size can take 1/4 the steps to selection
-    sort. Cutting the list in half over and over again means that we never have
-    to do the selection sort at all: eventually we end up with tiny
-    already-sorted lists. The work done is |n * log(n)| for this algorithm.
+    - Merge them together (repeatedly take the smallest of each).
+
+    This is better. The idea is that smaller lists are (much) faster to sort.
+    Cutting the list in half over and over again means that we eventually end
+    up with empty or one-element arrays, which are trivially sorted. The work
+    done is |n * log(n)| for this algorithm, better than |n * n|.
 
     Implementations of both sorts are provided in the code window.
 
@@ -1260,7 +1260,7 @@
       through the idea on paper.
 
     - Check out these animations of various sorting algorithms. The ones we
-      have looked at are "Selection" and "Quick":
+      have looked at are "Selection" and "Merge":
       http://www.sorting-algorithms.com/
 
     - Try removing all of the comments and see how small the algorithm really is.
@@ -1270,105 +1270,72 @@
     // These will be helpful in counting how much
     // work each algorithm does.
     var selection_compare_count = 0;
-    var qsort_compare_count = 0;
+    var merge_compare_count = 0;
+
+    // All sorting functions here create new arrays from the old ones.
+    // It's easier to see what they're doing that way.
 
     function selection_sort(arr) {
-      var len = arr.length;
-      for (var end_of_sorted = 0; end_of_sorted &lt; len; end_of_sorted++) {
-        // Find the smallest value in the unsorted part.
-        var smallest_position = end_of_sorted;
-        for (var i = end_of_sorted + 1; i &lt; len; i++) {
-          selection_compare_count++; // let's see how much work we did.
-          if (arr[i] &lt; arr[smallest_position]) {
-            smallest_position = i;
-          }
+      // Arrays with one or fewer elements are already sorted.
+      if (arr.length &lt;= 1) {
+        return arr.slice(0); // return a copy
+      }
+      // Find the location of the smallest element.
+      var index_of_smallest = 0;
+      for (var i = 1; i &lt; arr.length; i++) {
+        selection_compare_count++; // keep track of comparisons
+        if (arr[index_of_smallest] &gt; arr[i]) {
+          index_of_smallest = i;
         }
-        // Now we know where the smallest value is: swap.
-        var temp = arr[smallest_position];
-        arr[smallest_position] = arr[end_of_sorted];
-        arr[end_of_sorted] = temp;
+      }
+      // The rest of the elements don't include the
+      // smallest one we just found.
+      var piece1 = arr.slice(0, index_of_smallest);
+      var piece2 = arr.slice(index_of_smallest + 1);
+      var rest = piece1.concat(piece2);
+      return [arr[index_of_smallest]].concat(selection_sort(rest));
+    }
+
+    // Merge is a helper function, creating one sorted
+    // array from two sorted arrays.
+    function merge(a1, a2) {
+      merge_compare_count++; // keep track of comparisons
+      if (a1.length == 0) {
+        return a2;
+      } else if (a2.length == 0) {
+        return a1;
+      } else if (a1[0] &lt; a2[0]) {
+        return [a1[0]].concat(merge(a1.slice(1), a2));
+      } else {
+        return [a2[0]].concat(merge(a1, a2.slice(1)));
       }
     }
 
-    // When implementing recursive algorithms, this
-    // is a common pattern: a main function that acts
-    // as the entry point, and a helper that does the
-    // real work but has more arguments.
-    function qsort(arr) {
-      _qsort_helper(arr, 0, arr.length);
-    }
-
-    // This is the real worker, the recursive part that calls itself
-    // with different sections of the array.
-    function _qsort_helper(arr, start, end) {
-      // Here is our basis case: an array with 1 or fewer
-      // elements is trivially already sorted, so we're done.
-      if (end - start &lt;= 1) {
-        return;
+    function mergesort(arr) {
+      if (arr.length &lt;= 1) {
+        // Trivially sorted. Return it.
+        return arr;
       }
 
-      // First we pick a "middle" value. We don't know
-      // beforehand what the range is, so we just make
-      // a blind assumption that the first element is
-      // somewhere in between the lowest and highest.
-      var mid = arr[start];
+      // Split and sort each piece.
+      var mid = Math.floor(arr.length / 2);
+      var left = mergesort(arr.slice(0, mid));
+      var right = mergesort(arr.slice(mid));
 
-      // We will leave that right where it is, at the front.
-      // When the next step is complete, we'll move it to
-      // the "center" of the two lists where it belongs.
-
-      // Now, get all of the smaller values on the left
-      // side of it. We do this by remembering the position
-      // of the last not-properly-placed value (begins at
-      // start + 1, since mid is sitting at start) and
-      // walking down the array from start to end looking for
-      // something smaller. If we find one, we swap it in
-      // and advance the position.
-      var start_of_larger = start + 1;
-      for (var i = start_of_larger; i &lt; end; i++) {
-        qsort_compare_count++; // let's see how much work we did.
-        if (arr[i] &lt; mid) {
-          if (i != start_of_larger) {
-            // Found one not already in the right place.
-            // Swap it into the right spot.
-            var temp = arr[i];
-            arr[i] = arr[start_of_larger];
-            arr[start_of_larger] = temp;
-          }
-          // We just got one into the right place, so we can
-          // move on to the next one.
-          start_of_larger++;
-        }
-      }
-
-      // Now we have all of the smaller elements to the
-      // left of start_of_larger, and all the larger
-      // elements to the right of it. The only one out of
-      // place is "mid". Fix that now, moving it to one
-      // before start_of_larger:
-      var temp = arr[start_of_larger - 1];
-      arr[start_of_larger - 1] = arr[start];
-      arr[start] = temp;
-
-      // Now we have basically got two lists. We sort each side.
-      // And we do so using this very function!
-      // Note that we leave the mid alone. It's already in the right spot.
-      _qsort_helper(arr, start, start_of_larger - 1);
-      _qsort_helper(arr, start_of_larger, end);
+      return merge(left, right);
     }
 
     // Let's try it out!
     var a = [5, 2, 6, 3, 9, 10, 22, 5, 1, 3, 0.1, -3,
              23, -5, 28, 8, 11, 19, 33, 27, 13, 18];
-    var b = a.slice(0); // Create a copy of a.
 
     selection_compare_count = 0; // reset before running
-    selection_sort(a);
-    _output("selection sort (" + selection_compare_count + " comparisons):", a);
+    var s_sorted = selection_sort(a);
+    _output("selection sort (" + selection_compare_count + " comparisons):", s_sorted);
 
-    qsort_compare_count = 0; // reset before running
-    qsort(b);
-    _output("quicksort (" + qsort_compare_count + " comparisons):", b);
+    merge_compare_count = 0; // reset before running
+    var m_sorted = mergesort(a);
+    _output("mergesort (" + merge_compare_count + " comparisons):", m_sorted);
 
   </div>
   <div name="Function Arguments">
@@ -1431,7 +1398,7 @@
 
     It helps to remember that functions are objects, just like everything
     else in JavaScript, and they can therefore be assigned to variables and
-    passesd around and everything. In fact, you can create a function using a
+    passed around and everything. In fact, you can create a function using a
     **function expression**: a nameless function that is created on the fly:
 
       var myFuncVar = function(arg1, arg2) {
@@ -1447,7 +1414,7 @@
 
     Exercises
 
-    - Remember the global counter variables we used in the quicksort slide a
+    - Remember the global counter variables we used in the sorting slide a
       little while ago? Go back and see if you can move them into a closure
       instead. HINT: once you do this properly, you won't have to reset them
       before sorting anymore - that will happen inside the sort function (which
@@ -1782,7 +1749,7 @@
     of the animation functionality is now in one place: you could write this
     function, stick it in a library somewhere, and anyone else could easily
     call it without having to know exactly what order the steps are to make
-    things work. Before, we had to know that |tep| was an animation function,
+    things work. Before, we had to know that |step| was an animation function,
     and to start things off by using |requestAnimationFrame|. Now, we just have
     to call |run_demo|.
 
@@ -1918,6 +1885,11 @@
     concepts into some functions. While we're at it, we'll make it easy to
     draw circles.
 
+    Doing this kind of thing is called _refactoring_: sometimes code starts to
+    get messy, and you want to move common patterns out of the way so they can
+    be compartmentalized and reused elsewhere. It's an important and common
+    programming practice.
+
     The code window now has three new functions:
 
       animation_loop
@@ -1926,8 +1898,7 @@
 
     If you look at |run_demo| now, it is much more straightforward. You specify
     the drawing function and pass it to the animation loop and you're done.
-    Within the drawing function we're now just calling simple rectangle and
-    drawing functions, as well.
+    Within |draw| we're just calling simple drawing functions, as well.
 
     Exercises
 
@@ -2074,6 +2045,121 @@
     }
 
     run_demo(400, 200, 20, "red");
+  </div>
+  <div name="Accepting Input: Mouse Events">
+    Animations are fun, and you just made one that looks pretty neat.
+    Congratulations!
+
+    Now it's time to start accepting input from our users, and changing our
+    animations in response to that input. We'll start by making a simple
+    drawing program using the mouse.
+
+    To listen to events like mouse clicks and key presses, we call
+    |addEventListener| on the object that wants to receive the event. So, for
+    the canvas element, we would call something like this:
+
+      canvas.addEventListener(
+        "mousedown",
+        mouse_down_function);
+
+    There are many such events, some for mice, others for keyboards, and still
+    others for touchscreens. Take a look here for reference (there are a ton of
+    them):
+    https://developer.mozilla.org/en-US/docs/Web/Events
+
+    When |mouse_down_function| is called, it is given an |Event| object that
+    has information about the event, like where on the screen it happened.
+    Let's give this a try! In the code window we respond to the _mousedown_
+    event by figuring out the location of the mouse and drawing a circle there.
+    This is a nice overview of |Event| object members:
+    http://www.htmlgoodies.com/beyond/javascript/events-and-javascript-part-3-the-event-object.html
+
+    But, what this does is not all that interesting. The exercises below have
+    some ideas on how to make it better.
+
+    Exercises
+
+    - Add a |mouseup| event handler that outputs "up" to the output window.
+
+    - Add a |mousemove| event that outputs "move X Y", where X and Y are the
+      actual coordinates of the mouse location.
+
+    - Use |mousedown|, |mouseup|, and |mousemove| to allow drawing to happen
+      when the mouse is moved, but only when the button is down.
+
+    --
+
+    function run_demo(width, height, radius, color) {
+      var wc = _canvas_window(width, height);
+      var canvas = wc.canvas;
+      var ctx = wc.context;
+
+      canvas.addEventListener('mousedown', function(event) {
+        var x = event.offsetX;
+        var y = event.offsetY;
+        _output("down", x, y);
+        _fill_circle(ctx, x, y, radius, color);
+      });
+    }
+
+    run_demo(500, 500, 20, "blue");
+  </div>
+  <div name="Accepting Input: Keyboard Events">
+    Let's see what it takes to get key events to work for us.
+
+    The main keyboard events are
+
+      keypress
+      keydown
+      keyup
+
+    The |keypress| event is simplest to work with, but can sometimes be less
+    desirable for games, because it works like you're typing (complete with
+    repeated keys after you hold it down long enough).
+
+    Usually you'll want to listen to the |keyup| event, so we do that here.
+    Note that the code for the spacebar is |32|, so that's what we check for
+    before launching the ball into space.
+
+    Exercises
+
+    - What happens if you press the space while the launch is in progress? Can
+      you fix this so that pressing "space" again pauses the launch?
+
+    - The animation keeps running even after the ball exits the screen. Can you
+      cause the animation to stop once the ball is gone? Remember that in this
+      tutorial, returning |false| from the drawing function will stop the
+      animation loop.
+
+    --
+
+    function run_demo() {
+      var WIDTH = 300,
+          HEIGHT = 500,
+          RADIUS = 20,
+          SPEED = 100;
+
+      var wc = _canvas_window(WIDTH, HEIGHT);
+
+      var launched = false;
+      var y = HEIGHT - RADIUS;
+
+      wc.window.addEventListener('keyup', function(event) {
+        if (event.keyCode == 32) {
+          launched = true;
+        }
+      });
+
+      _animation_loop(function(_, delta_t) {
+        if (launched) {
+          y -= SPEED * (delta_t / 1000);
+        }
+        wc.context.clearRect(0, 0, WIDTH, HEIGHT);
+        _fill_circle(wc.context, WIDTH / 2, y, RADIUS, "#cccccc");
+      });
+    }
+
+    run_demo();
   </div>
 </div>
 </body>

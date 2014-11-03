@@ -239,6 +239,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
         name = "canvasWindow";
       }
       var win = window.open(null, name, "height=" + height + ",width=" + width);
+      win.focus();
       win.document.body.style.margin = "0";
       win.document.body.style.padding = "0";
       var canvas = win.document.getElementById("_canvas_");
@@ -291,9 +292,8 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     try {
       eval($scope.code);
     } catch(err) {
+      console.log(err, err.stack);
       $scope.addErrorText("" + err);
-      console.log("caught an error");
-      console.log(err);
     }
   };
 
@@ -324,10 +324,10 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope._addText = function(text, elementClass) {
     var output = document.getElementById("output");
-    var div = document.createElement("div");
-    div.setAttribute("class", elementClass);
-    div.appendChild(document.createTextNode(text));
-    output.appendChild(div);
+    var pre = document.createElement("pre");
+    pre.setAttribute("class", elementClass);
+    pre.appendChild(document.createTextNode(text));
+    output.appendChild(pre);
   };
 
   $scope.clearCode = function() {
