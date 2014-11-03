@@ -1859,6 +1859,24 @@
     The code window has the animation in it, but this time using the
     |_canvas_window| function.
 
+    Exercises
+
+    - The rectangles are sometimes drawn partly off of the window. Fix the
+      random locations to always allow for the width and height of the rectangle
+      to be completely inside of the window.
+
+    - Add another closure called |stop|. Have it set a variable called
+      |finished| to |true|, and change |step| to only request a new animation
+      frame if |finished == false|. Then change the call to |run_demo| to get
+      the |stop| function out of it, and uncomment the line that calls it in
+      |setTimeout|.
+
+    - Try adding one more closure called |start| that calls the first
+      |requestAnimationFrame| instance and sets |finished| to |false|. Instead
+      of returning just one closure, return an object that contains both
+      |start| and |stop|. Note that you are much more on your own here, but you
+      can definitely do this.
+
     --
 
     function run_demo(width, height, duration) {
@@ -1868,7 +1886,6 @@
       var t0 = null;
       var t_next = null;
 
-      // Look, ma! "step" is now a closure!
       function step(ts) {
         if (t0 == null) {
           t0 = ts;
@@ -1887,7 +1904,11 @@
       window.requestAnimationFrame(step);
     }
 
+    // TODO: var stop = run_demo(...);
     run_demo(200, 200, 350);
+
+    // TODO: uncomment this after "stop" is returned from run_demo.
+    // window.setTimeout(stop, 5000);
   </div>
 </div>
 </body>

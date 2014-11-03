@@ -203,65 +203,61 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope.runCode = function() {
     $scope.clearOutput();
+    var _output = function(text) {
+      var args = [];
+      for (var i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+      $scope.addOutputText(args.join(" "));
+    };
+    var _canvas = function(width, height) {
+      if ($scope.canvas == null) {
+        var container = document.getElementById("output");
+        $scope.canvas = document.createElement("canvas");
+        if (width === undefined) {
+          width = 200;
+        }
+        if (height === undefined) {
+          height = 200;
+        }
+        $scope.canvas.width = width;
+        $scope.canvas.height = height;
+        $scope.canvas.style.border = "1px solid black";
+        container.insertBefore($scope.canvas, container.firstChild);
+      }
+      if (!(width === undefined || width == null || width == $scope.canvas.width)) {
+        $scope.canvas.width = width;
+      }
+      if (!(height === undefined || height == null || height == $scope.canvas.height)) {
+        $scope.canvas.height = height;
+      }
+      return $scope.canvas;
+    };
+    var _canvas_window = function(width, height, name) {
+      if (name === undefined) {
+        name = "canvasWindow";
+      }
+      var win = window.open(null, name, "height=" + height + ",width=" + width);
+      var canvas = win.document.getElementById("_canvas_");
+
+      if (!canvas) {
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.id = "_canvas_";
+        win.document.body.appendChild(canvas);
+      }
+
+      return {
+        "window": win,
+        "canvas": canvas,
+        "context": canvas.getContext('2d'),
+      };
+    };
     try {
-      var _output = function(text) {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-          args.push(arguments[i]);
-        }
-        args = args.join(" ");
-        if ($scope.out != "") {
-          $scope.out += "\n";
-        }
-        $scope.out += args;
-      };
-      var _canvas = function(width, height) {
-        if ($scope.canvas == null) {
-          var container = document.getElementById("output");
-          $scope.canvas = document.createElement("canvas");
-          if (width === undefined) {
-            width = 200;
-          }
-          if (height === undefined) {
-            height = 200;
-          }
-          $scope.canvas.width = width;
-          $scope.canvas.height = height;
-          $scope.canvas.style.border = "1px solid black";
-          container.insertBefore($scope.canvas, container.firstChild);
-        }
-        if (!(width === undefined || width == null || width == $scope.canvas.width)) {
-          $scope.canvas.width = width;
-        }
-        if (!(height === undefined || height == null || height == $scope.canvas.height)) {
-          $scope.canvas.height = height;
-        }
-        return $scope.canvas;
-      };
-      var _canvas_window = function(width, height, name) {
-        if (name === undefined) {
-          name = "canvasWindow";
-        }
-        var win = window.open(null, name, "height=" + height + ",width=" + width);
-        var canvas = win.document.getElementById("_canvas_");
-
-        if (!canvas) {
-          var canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          canvas.id = "_canvas_";
-          win.document.body.appendChild(canvas);
-        }
-
-        return {
-          "window": win,
-          "canvas": canvas,
-          "context": canvas.getContext('2d'),
-        };
-      };
       eval($scope.code);
     } catch(err) {
-      $scope.err = "" + err;
+      $scope.addErrorText("" + err);
     }
   };
 
@@ -276,8 +272,26 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   $scope.doNothing = function(e) {}
 
   $scope.clearOutput = function() {
-    $scope.out = "";
-    $scope.err = "";
+    var output = document.getElementById("output");
+    while (output.lastChild) {
+      output.removeChild(output.lastChild);
+    }
+  };
+
+  $scope.addOutputText = function(text) {
+    $scope._addText(text, "stdout");
+  };
+
+  $scope.addErrorText = function(text) {
+    $scope._addText(text, "stderr");
+  };
+
+  $scope._addText = function(text, elementClass) {
+    var output = document.getElementById("output");
+    var div = document.createElement("div");
+    div.setAttribute("class", elementClass);
+    div.appendChild(document.createTextNode(text));
+    output.appendChild(div);
   };
 
   $scope.clearCode = function() {
