@@ -2,20 +2,23 @@
 <html ng-app="runcode">
 <head>
 <title>Interactive JavaScript Tutorial</title>
-<link rel="icon" type="image/png" href="/static/img/JavaScript-logo-64x64.png">
-<link rel="stylesheet" href="/static/angular/angular-ui.min.css">
-<link rel="stylesheet" href="/static/css/code.css">
-<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
-<link rel="stylesheet" href="/static/codemirror/theme/neat.css">
-<script src="/static/jquery/jquery-1.8.2.min.js"></script>
-<script src="/static/codemirror/lib/codemirror.js"></script>
-<script src="/static/codemirror/mode/javascript/javascript.js"></script>
-<script src="/static/angular/angular.min.js"></script>
-<script src="/static/angular/angular-sanitize.min.js"></script>
-<script src="/static/angular/angular-ui.min.js"></script>
-<script src="/static/js/app.js"></script>
-<script src="/static/js/filters.js"></script>
-<script src="/static/js/controllers.js"></script>
+<link rel="icon" type="image/png" href="static/img/JavaScript-logo-64x64.png">
+<link rel="stylesheet" href="static/angular/angular-ui.min.css">
+<link rel="stylesheet" href="static/css/code.css">
+<link rel="stylesheet" href="static/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="static/codemirror/theme/neat.css">
+<script src="static/jquery/jquery-1.8.2.min.js"></script>
+<script src="static/codemirror/lib/codemirror.js"></script>
+<script src="static/codemirror/mode/xml/xml.js"></script>
+<script src="static/codemirror/mode/css/css.js"></script>
+<script src="static/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="static/codemirror/mode/javascript/javascript.js"></script>
+<script src="static/angular/angular.min.js"></script>
+<script src="static/angular/angular-sanitize.min.js"></script>
+<script src="static/angular/angular-ui.min.js"></script>
+<script src="static/js/app.js"></script>
+<script src="static/js/filters.js"></script>
+<script src="static/js/controllers.js"></script>
 </head>
 <body ng-controller="CodeCtrl">
 <div id="content_container" ng-class="{'collapsed': contentCollapsed}">
@@ -64,7 +67,7 @@
     </ul>
   </div>
   <div id="workspace_top">
-    <textarea name="codetext" ui-codemirror="{lineNumbers: true, theme: 'neat', indentWithTabs: false, tabSize: 2, indentUnit: 2, extraKeys: {Tab: 'indentMore', 'Shift-Enter': doNothing } }" ng-model="code"></textarea>
+    <textarea id="codetext" ui-codemirror="{lineNumbers: true, theme: 'neat', indentWithTabs: false, tabSize: 2, indentUnit: 2, extraKeys: {Tab: 'indentMore', 'Shift-Enter': doNothing } }" ng-model="code"></textarea>
   </div>
   <div id="workspace_bottom">
     <div id="output">
@@ -1213,6 +1216,47 @@
     _output("a", a);
     _output("b", b);
     _output("c", c);
+  </div>
+  <div name="Continue to the Break">
+    Within a loop (any kind of loop), you can use the |break| and |continue|
+    keywords. These are short-circuiting operations. The |break| keyword
+    instructs the interpreter to "exit this loop immediately", and the
+    |continue| keyword instructs it to "go back to the beginning of the loop,
+    skipping the rest of its body."
+
+    The code window shows examples of these statements work. They are both
+    pretty useful, but you will tend to see |break| a lot more frequently.
+
+    Of course, if you are in a loop within a function, you can also call
+    |return| at any time to jump all the way out of the function (and the loop,
+    obviously).
+
+    Exercises
+
+    - Try iterating over all of the keys in the |window| object. Stop when you
+      find one that starts with 'c'.
+
+    --
+
+    _output("first loop");
+
+    // break exits early.
+    for (var i = 0; i &lt; 10; i++) {
+      if (i == 5) {
+        break;
+      }
+      _output(i);
+    }
+
+    _output("second loop");
+
+    // continue goes back to the beginning immediately.
+    for (var i = 0; i &lt; 10; i++) {
+      if (i &gt; 2 &amp;&amp; i &lt; 7) {
+        continue;
+      }
+      _output(i);
+    }
   </div>
   <div name="Checkpoint: Sorting with Loops and Recursion">
     It's time to apply what we have learned. If anything in this chapter is
@@ -2660,6 +2704,23 @@
     var p = new Pos(20, 30);
     var q = new Pos(-1, -12);
     _output(p, "+", q, "=", p.add(q));
+  </div>
+  <div name="Out of the Box" mode="text/html">
+    Up until this point, you have been writing and editing code in a pretty
+    special environment. When you write your own JavaScript, it will almost
+    certainly not be in this tutorial. Instead, you would write it to run in
+    your own web page.
+
+    That's really all this tutorial is: a glorified web page with some pretty
+    clever JavaScript included (i.e., _jQuery_, _CodeMirror_, and _AngularJS_).
+
+    We'll start with the simplest way to go about this: write your own HTML
+    file and include the JavaScript code directly inside of it. This tutorial
+    has aimed to always expose standard functionality before hiding it away for
+    convenience, so you should be able to use all of the tricks you have
+    learned here to make your own programs. Any function that we have exposed
+    that starts with |_| is, of course, unique to this tutorial, but those were
+    only ever introduced after exposing how they worked.
   </div>
 </div>
 </body>

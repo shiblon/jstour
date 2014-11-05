@@ -20,6 +20,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope.location = $location;
   $scope.canvas = null;
+  $scope.defaultMode = "javascript";
 
   // This naively assumes that the dirty state is "sticky" unless you force a
   // full recomputation. Works for most purposes in the UI.
@@ -33,7 +34,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   };
 
   $scope.storageKey = function() {
-    return "pytut-" + $scope.tutorial.name;
+    return "jstour-" + $scope.tutorial.name;
   };
 
   $scope.saveCode = function() {
@@ -83,6 +84,14 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   };
   // TOC should be off when we start.
   $scope.tocShowing = false;
+
+  $scope.mirror = function() {
+    var node = document.getElementsByClassName("CodeMirror")[0];
+    if (node) {
+      return node.CodeMirror;
+    }
+    return undefined;
+  };
 
   // Get the tutorials out of the document itself.
   (function() {
@@ -145,6 +154,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       var chapter = $(rawChapters[c]);
       var title = chapter.attr('name');
       var text = chapter.text();
+      var mode = chapter.attr('mode') || $scope.defaultMode;
 
       var lines = dedent(trimBlanks(lineSplit(text)));
       var data = splitProseAndCode(lines);
@@ -157,10 +167,22 @@ function CodeCtrl($scope, $http, $location, $timeout) {
         'title': title,
         'description': prose,
         'code': code,
+        'mode': mode,
       });
     }
     $scope.tutorials = chapterObjs;
-    $scope.tutorial = $scope.tutorials[$scope.chapter-1];
+    // Call this instead of accessing $scope.tutorials directly.
+    // It allows us to do things like switching out the CodeMirror mode.
+    function loadTutorial(index) {
+      var t = $scope.tutorials[index],
+          m = $scope.mirror();
+      if (m && t.mode && t.mode != m.getMode()) {
+        m.setOption('mode', t.mode);
+        m.refresh();
+      }
+      return t;
+    }
+    $scope.tutorial = loadTutorial($scope.chapter - 1);
     $scope.loadCode();
 
     // Redirect to the first page if none is specified.
@@ -182,7 +204,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       if (newChapter != $scope.chapter) {
         $scope.saveCode();
         $scope.chapter = newChapter;
-        $scope.tutorial = $scope.tutorials[newChapter-1];
+        $scope.tutorial = loadTutorial(newChapter - 1);
         $scope.loadCode();
         $scope.clearOutput();
         $(document.body).scrollTop(0);
@@ -203,7 +225,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope.runCode = function() {
     $scope.clearOutput();
-    var _output = function(text) {
+    window._output = function(text) {
       var args = [];
       for (var i = 0; i < arguments.length; i++) {
         args.push(arguments[i]);
@@ -357,6 +379,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       eval($scope.code);
     } catch(err) {
       console.log(err);
+      console.log(err.stack);
       $scope.addErrorText($scope.prettyStack(err.stack));
     }
   };
@@ -383,11 +406,10 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     var output = [lines[0]];
     // Now only keep lines that have <anonymous> as the file name, and filter
     // out irrelevant text from those.
-    var allDone = false;
-    for (var i = 1, done = false; !done && i < lines.length; i++) {
+    for (var i = 1; i < lines.length; i++) {
       var line = lines[i];
-      if (line.match(/^\s*at Object.eval /)) {
-        done = true;
+      if (line.match(/^\s*at .*runCode/)) {
+        break;
       }
       line = line.replace(/\([^()]*\)/, '');
       line = line.replace(/\s*\(.*:(\d+):(\d+)\)$/, ":$1:$2");
