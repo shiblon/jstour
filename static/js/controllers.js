@@ -356,8 +356,8 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     try {
       eval($scope.code);
     } catch(err) {
-      console.log(err, err.stack);
-      $scope.addErrorText(err);
+      console.log(err);
+      $scope.addErrorText($scope.prettyStack(err.stack));
     }
   };
 
@@ -378,6 +378,25 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     }
   };
 
+  $scope.prettyStack = function(stack) {
+    var lines = stack.split(/\r\n|\r|\n/);
+    var output = [lines[0]];
+    // Now only keep lines that have <anonymous> as the file name, and filter
+    // out irrelevant text from those.
+    var allDone = false;
+    for (var i = 1, done = false; !done && i < lines.length; i++) {
+      var line = lines[i];
+      if (line.match(/^\s*at Object.eval /)) {
+        done = true;
+      }
+      line = line.replace(/\([^()]*\)/, '');
+      line = line.replace(/\s*\(.*:(\d+):(\d+)\)$/, ":$1:$2");
+      line = line.replace("Object.eval", "_Main_");
+      output.push(line);
+    }
+    return output.join("\n");
+  };
+
   $scope.addOutputText = function(text) {
     $scope._addText(text, "stdout");
   };
@@ -389,7 +408,6 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   $scope._addText = function(text, elementClass) {
     var output = document.getElementById("output");
     var scrollDown = (output.scrollHeight - output.clientHeight - output.scrollTop) < 12;
-    console.log(scrollDown);
     var pre = document.createElement("pre");
     pre.setAttribute("class", elementClass);
     pre.appendChild(document.createTextNode(text));
