@@ -2447,6 +2447,15 @@
       code *and* the |onkeyinput| code to keep these from getting lost. HINT: you
       will need to keep track of more than one move - use an array.
 
+    - Make the "Crashed" text appear in the game window instead of the output
+      window.
+
+    - The game starts out really quickly. Add a 3-2-1 countdown timer before
+      the snake starts to move. This will require you to keep track of some
+      more state, such as whether the countdown is over, and which count it is
+      on. Note that it is also going to move more slowly that game frames, so
+      you will need to do something to ignore some of the in-between ticks.
+
     --
 
     var CELLS_WIDE = 30, CELLS_HIGH = 30,
@@ -2539,6 +2548,118 @@
     }
 
     start_game();
+  </div>
+  <div name="Classes">
+    You can do a lot of things with closures, and we have seen some very
+    powerful uses of them. They are powerful enough, in fact, that you could
+    just stick with them and be quite productive. They are a favorite tool of
+    programmers of many languages.
+
+    We won't get into it in any great depth in this tutorial, but JavaScript
+    also supports the notion of a **class**. Put simply, a class is a blueprint
+    for creating objects that have both data and functions in their fields.
+
+    The code window demonstrates an example of classes in JavaScript; here we
+    defined |Pos|. The first thing to notice is that this takes up a lot more
+    code than what we had before to accomplish the same thing. Why, then, is
+    this something people do? The answer is typically _encapsulation_ and
+    _reuse_. By defining things in this way, you can hide some of the
+    commonly-invoked functionality behind a nice uniform interface and allow
+    these ideas to be reused. This obviously makes a lot of sense for |Pos|
+    because it has a lot of applications.
+
+    To create an **instance** of a class, you use |new|:
+
+      var p = new Pos(20, 30);
+      var d = new Pos(0, 1);
+
+    If you look carefully at the code window, you will see references to |this|
+    scattered throughout. The |this| function variable is magical: it appears
+    when you are inside of a function called with |new| or a function that is
+    called from an _instance of a class_. In the above example, this means that
+    when you call |p.add|, the |this| variable is equal to |p|.
+
+    Another reason to create classes is _polymorphism_. This is when you have
+    an object of unknown type, and you want to do something with it anyway,
+    like convert it to a string. We see an example of exactly that, here,
+    because we define the method |toString| on our class. JavaScript, when it
+    is trying to convert an object to a string, will try to find and call
+    |toString|. If it is there, it uses it, otherwise it creates a default
+    string.
+
+    It is probably best for now to not worry too much about the special
+    |prototype| field. Just note that all functions in JavaScript have a
+    |prototype| field assigned to them, and that adding functions to it is how
+    you make object methods that have a reasonable |this| in them.
+
+    A final note is in order regarding |this|: it is convenient when working
+    with classes and their instances (objects), but it is unexpectedly magical
+    in very unfortunate ways. The most common way that it can bite you is when
+    it gets overwritten by an event handler that is calling your function. For
+    this reason, when creating event handler functions, don't _ever_ do this:
+
+      window.addEventListener("close", myobj.method);
+
+    If you do, you will find that |this| inside of |method| is not |myobj|
+    anymore, but something entirely different. It's a major wart on the face of
+    JavaScript, and one that trips people up quite frequently.
+
+    Instead, **always create a new function that calls your method** like this:
+
+      window.addEventListener("close", function(event) {
+        myobj.method();
+      });
+
+    It doesn't matter whether you create the function inline as above, or
+    outside of the call as we have done elsewhere. So long as the function does
+    not rely on |this|, it can be safely used as a callback in this way.
+
+    Exercises
+
+    - Remove the |toString| method (or rename it to, e.g., |_toString|) and see
+      how the output changes.
+
+    - Try calling |Pos| without |new| and see what happens when you try using it.
+
+    - Create your own |Snake| class that accepts a position and direction
+      (both |Pos| instances), and that has methods to get the |nextPos|, to
+      |eat|, and to |move|. How would having such a class make your big bang
+      code look?
+
+    --
+
+    // It is typical to name classes with an initial capital letter
+    // to set them apart from other functions.
+
+    // Class Pos: holds x and y coordinates.
+    function Pos(x, y) {
+      this.set(x, y);
+    }
+
+    // Pos.toString: make a string representation of this Pos.
+    Pos.prototype.toString = function() {
+      return "Pos(" + this.x + ", " + this.y + ")";
+    }
+
+    // Pos.set: set the x and y all at once.
+    Pos.prototype.set = function(x, y) {
+      this.x = x;
+      this.y = y;
+    };
+
+    // Pos.add: add another position to this one.
+    Pos.prototype.add = function(other) {
+      return new Pos(this.x + other.x, this.y + other.y);
+    };
+
+    // Pos.copy: create a New pos the same as this one.
+    Pos.prototype.copy = function() {
+      return new Pos(this.x, this.y);
+    };
+
+    var p = new Pos(20, 30);
+    var q = new Pos(-1, -12);
+    _output(p, "+", q, "=", p.add(q));
   </div>
 </div>
 </body>

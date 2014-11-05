@@ -357,7 +357,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       eval($scope.code);
     } catch(err) {
       console.log(err, err.stack);
-      $scope.addErrorText("" + err);
+      $scope.addErrorText(err);
     }
   };
 
