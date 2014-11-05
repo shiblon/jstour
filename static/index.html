@@ -2431,6 +2431,22 @@
     - You might notice after playing the game for a bit that you can't run into
       yourself. Fix the code to test for a self-crash.
 
+    - Change the |new_food| function to not allow food to appear on *any* part
+      of the snake.
+
+    - Add detection of the *Escape* key to end the game. HINT: you can find the
+      keycode for this by setting your keyinput listener to
+      |_output(event.keyCode)|.
+
+    - Use the |context.fillText| method to write the score onto the playing
+      field as the game progresses. Look up the |context.globalAlpha| field to
+      make the text semi-transparent so it doesn't interfere with the game.
+
+    - You may have noticed that two moves in rapid succession can sometimes
+      confuse this game; it will ignore the first of the two. Fix the |ontick|
+      code *and* the |onkeyinput| code to keep these from getting lost. HINT: you
+      will need to keep track of more than one move - use an array.
+
     --
 
     var CELLS_WIDE = 30, CELLS_HIGH = 30,
@@ -2516,7 +2532,7 @@
 
       _big_bang(WIDTH, HEIGHT, {
         "tick": ontick,
-        "interval": 200, // 1/5 second
+        "interval": 100,
         "draw": ondraw,
         "keyinput": onkey,
       });

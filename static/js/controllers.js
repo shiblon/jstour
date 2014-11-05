@@ -210,7 +210,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       }
       $scope.addOutputText(args.join(" "));
     };
-    var _canvas = function(width, height) {
+    window._canvas = function(width, height) {
       var canvas = document.getElementById("_canvas");
       if (!canvas) {
         var container = document.getElementById("output");
@@ -234,7 +234,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       }
       return canvas;
     };
-    var _canvas_window = function(width, height, name) {
+    window._canvas_window = function(width, height, name) {
       if (name === undefined) {
         name = "canvasWindow";
       }
@@ -259,7 +259,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
         "context": canvas.getContext('2d'),
       };
     };
-    var _animation_loop = function(callback) {
+    window._animation_loop = function(callback) {
       var last_ts = null;
       var repeat = true;
       function step(ts) {
@@ -279,7 +279,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       requestAnimationFrame(step);
       return function() { repeat = false; };
     };
-    var _fill_rect = function(context, x, y, w, h, color) {
+    window._fill_rect = function(context, x, y, w, h, color) {
       // Since this is in a function, we want to
       // leave things the way we found them. Nobody
       // would expect to call this and have the global
@@ -289,7 +289,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       context.fillRect(x, y, w, h);
       context.restore();
     };
-    var _fill_circle = function(context, x, y, radius, color) {
+    window._fill_circle = function(context, x, y, radius, color) {
       context.save()
       context.fillStyle = color;
       context.beginPath();
@@ -297,7 +297,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       context.fill();
       context.restore();
     };
-    var _big_bang = function(width, height, config) {
+    window._big_bang = function(width, height, config) {
       function get_wc() {
         var NAME = "big_bang_window_";
         wc = _canvas_window(width, height, NAME);
