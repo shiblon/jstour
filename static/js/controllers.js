@@ -245,6 +245,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       var canvas = win.document.getElementById("_canvas_");
 
       if (!canvas) {
+        // Create and add a canvas.
         var canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
@@ -260,16 +261,23 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     };
     var _animation_loop = function(callback) {
       var last_ts = null;
+      var repeat = true;
       function step(ts) {
         if (last_ts == null) {
           last_ts = ts;
         }
-        if (callback(ts, ts - last_ts) !== false) {
-          requestAnimationFrame(step);
-          last_ts = ts;
+        if (!repeat) {
+          return;
         }
+        var ret = callback(ts, ts - last_ts);
+        if (ret === false) {
+          return;
+        }
+        requestAnimationFrame(step);
+        last_ts = ts;
       }
       requestAnimationFrame(step);
+      return function() { repeat = false; };
     };
     var _fill_rect = function(context, x, y, w, h, color) {
       // Since this is in a function, we want to
@@ -288,6 +296,62 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       context.arc(x, y, radius, 0, Math.PI * 2, true);
       context.fill();
       context.restore();
+    };
+    var _big_bang = function(width, height, config) {
+      function get_wc() {
+        var NAME = "big_bang_window_";
+        wc = _canvas_window(width, height, NAME);
+        if (wc.window._running_big_bang_) {
+          wc.window.close();
+          wc = _canvas_window(width, height, NAME);
+        }
+        wc.window._running_big_bang_ = true;
+        return wc
+      }
+
+      var wc = get_wc();
+
+      var tick = config.tick || function() {};
+      var draw = config.draw || function() {};
+
+      var interval = config.interval;
+      if (!interval || interval < 0) {
+        interval = 0;
+      }
+
+      if (config.keyinput) {
+        wc.window.addEventListener("keypress", config.keyinput);
+        wc.window.addEventListener("keydown", config.keyinput);
+        wc.window.addEventListener("keyup", config.keyinput);
+      }
+
+      if (config.mouseinput) {
+        wc.window.addEventListener("mousedown", config.mouseinput);
+        wc.window.addEventListener("mouseup", config.mouseinput);
+        wc.window.addEventListener("mousemove", config.mouseinput);
+      }
+
+      var tnext = null;
+      var stop = _animation_loop(function(ts, delta_t) {
+        if (wc.window.closed) {
+          return false;
+        }
+        if (tnext == null) {
+          tnext = ts;
+        }
+        if (!interval || ts >= tnext) {
+          tnext += interval;
+          if (false === tick(ts, delta_t)) {
+            return false;
+          }
+        }
+        if (false === draw(wc.canvas, wc.context)) {
+          return false;
+        }
+        return true;
+      });
+
+      wc.window.addEventListener("close", stop);
     };
     try {
       eval($scope.code);
@@ -324,10 +388,15 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope._addText = function(text, elementClass) {
     var output = document.getElementById("output");
+    var scrollDown = (output.scrollHeight - output.clientHeight - output.scrollTop) < 12;
+    console.log(scrollDown);
     var pre = document.createElement("pre");
     pre.setAttribute("class", elementClass);
     pre.appendChild(document.createTextNode(text));
     output.appendChild(pre);
+    if (scrollDown) {
+      output.scrollTop = output.scrollHeight - output.clientHeight;
+    }
   };
 
   $scope.clearCode = function() {

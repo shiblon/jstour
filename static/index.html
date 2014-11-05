@@ -2161,6 +2161,369 @@
 
     run_demo();
   </div>
+  <div name="A More Friendly Game Loop">
+    We are nearly ready to make a real game that you can play. Now that we know
+    how to draw with animation frames, change state with time changes, and
+    accept user input, we can make a more useful game loop than just our little
+    |_animation_loop|.
+
+    The first issue with |_animation_loop| is that it combines two concepts,
+    and it probably shouldn't. The first concept is that of a ticking clock:
+    the arguments to the draw function are all about time and the passing of
+    time. But it is also expected that the draw function actually change
+    something on a canvas. Let's split these ideas up to make them each simpler
+    to reason about.
+
+    Finally, we can accept user input, but it can sort of come at any time, and
+    the mechanism for getting it is not very uniform. You may have noticed that
+    we accept mouse events on the _canvas_, but keyboard events on the
+    _window_. Let's get those details right once and forget about them later
+    on. To do that, we'll borrow an idea from the Racket language learning
+    libraries called *Big Bang*.
+
+    Note how the |big_bang| function is documented. There are various styles
+    for doing this, but they all typically have a lot in common: a simple
+    description, arguments are listed and defined, and return values are
+    explained.
+
+    Exercises
+
+    - Capture the |tick| event and do something interesting with it. You might,
+      for example, try outputting a "tick" in the output window every second.
+
+    - Try replacing your call to |big_bang| with a call to |_big_bang|. That's
+      right - this is now built in to the tutorial and you can just use it from
+      now on. You can see what it does with |_output(_big_bang)| - it's very
+      similar to what we have here, with a few little tweaks to make it more
+      robust to running code twice in the same window. It also adds the
+      "interval" configuration, so you can have |tick| called only every so
+      often.
+
+    --
+
+    // big_bang opens a window and starts a game loop in it.
+    // Args:
+    //   width - the width of the new window in pixels.
+    //   height - the height of the new window in pixels.
+    //   config - a map with various configuration information in it, all of which is optional:
+    //     tick - a function(ts, delta_t) to be called at each "tick" of the clock.
+    //     draw - a function(canvas, context) to be called whenever a frame needs to be drawn.
+    //     keyinput - a function(event) to be called whenever key input is received.
+    //     mouseinput - a function(event) to be called whenever mouse input is received.
+    function big_bang(width, height, config) {
+      var wc = _canvas_window(width, height);
+      var tick = config.tick || function() {};
+      var draw = config.draw || function() {};
+
+      if (config.keyinput) {
+        wc.window.addEventListener("keypress", config.keyinput);
+        wc.window.addEventListener("keydown", config.keyinput);
+        wc.window.addEventListener("keyup", config.keyinput);
+      }
+
+      if (config.mouseinput) {
+        wc.window.addEventListener("mousedown", config.mouseinput);
+        wc.window.addEventListener("mouseup", config.mouseinput);
+        wc.window.addEventListener("mousemove", config.mouseinput);
+      }
+
+      _animation_loop(function(ts, delta_t) {
+        tick(ts, delta_t);
+        draw(wc.canvas, wc.context);
+      });
+    }
+
+    // Now let's try it out!
+    big_bang(400, 300, {
+      "mouseinput": function(event) {
+        _output(event.type, event.clientX, event.clientY);
+      },
+      "keyinput": function(event) {
+        _output(event.type, event.keyCode);
+      }
+    });
+  </div>
+  <div name="Snakes in a Game">
+    Now that we have the |_big_bang| function, it is convenient to think of a
+    game as an endless loop where some internal state changes as the clock
+    ticks and that state is _rendered_ to the canvas when the browser is ready
+    for it.
+
+    To illustrate this idea, let's make a simple not-quite-but-nearly-snake
+    game. The snake will be a single segment, and you will be able to move it
+    around. The big questions are these:
+
+    - What values do you need to keep track of to represent the world?
+
+    - Which of the values change, and which are constant?
+
+    - When should the values change?
+
+    For this non-snaky snake thing, we'll need
+
+    - The position of the head,
+
+    - The direction it is moving, and
+
+    - The boundaries of the playing field.
+
+    The next thing to ask is this: what changes the state, besides the clock?
+    One thing comes to mind:
+
+    - Pressing an arrow key.
+
+    Having identified these ideas, head over to the code window and see what is
+    up there. There is a lot of information in the comments, so don't forget to
+    read those.
+
+    Exercises
+
+    - Add the collision detection for the other two walls in |ontick|.
+
+    - Can you think of another way of expressing the |keyinput| logic? What if
+      you created a "map" with the keycodes of interest in it, and the values to
+      use for |vx| and |vy|?
+
+    - Look up the "switch" statement and see how that might help with some of
+      this code: http://www.w3schools.com/js/js_switch.asp.
+
+    - Add food to the game. You will need a food position, and your draw function will
+      need to also draw the food on the canvas. When does the food appear? When
+      do you need to create new food? Output "yum!" (or something less lame)
+      when the snake runs into a bit of food.
+
+    - Make the game harder by making the snake move faster.
+
+    --
+
+    var CELLS_WIDE = 30; // number of cells from left to right
+    var CELLS_HIGH = 30; // number of cells from top to bottom
+    var CELL_WIDTH = 15; // width of an individual cell
+    var CELL_HEIGHT = 15; // height of an individual cell
+
+    var WIDTH = CELLS_WIDE * CELL_WIDTH;
+    var HEIGHT = CELLS_HIGH * CELL_HEIGHT;
+
+    function start_game() {
+      // This represents the snake's head. Hey, it's a start!
+      var head = {
+        "x": Math.floor(CELLS_WIDE / 2),
+        "y": Math.floor(CELLS_HIGH / 2),
+        "vx": 1, // x velocity (in cells per tick)
+        "vy": 0, // y velocity (in cells per tick)
+      };
+
+      // When the clock ticks, we advance the snake in whatever
+      // direction it is already moving, and we check for crashes.
+      function ontick() {
+        var new_x = head.x + head.vx;
+        var new_y = head.y + head.vy;
+        // Check for a crash, quit if we see one.
+        if (new_x &lt; 0) {
+          _output("Crashed into left wall!");
+          return false;
+        } else if (new_x &gt;= CELLS_WIDE) {
+          _output("Crashed into right wall!");
+          return false;
+        }
+        // All set - move the head.
+        head.x = new_x;
+        head.y = new_y;
+        return true; // continue ticking
+      }
+
+      // When a key is pressed, all it does is change the direction of the
+      // head.
+      function onkey(event) {
+        if (event.type != "keydown") {
+          return;
+        }
+        // How do you think I figured out these codes?
+        // You could look them up in a table, or you could
+        // do what I did and go back a slide. Running that
+        // program causes the key numbers to be sent to
+        // the output window when you type them.
+        if (37 == event.keyCode) { // Left
+          head.vx = -1;
+          head.vy = 0;
+        } else if (38 == event.keyCode) { // Up
+          head.vx = 0;
+          head.vy = -1;
+        } else if (39 == event.keyCode) { // Right
+          head.vx = 1;
+          head.vy = 0;
+        } else if (40 == event.keyCode) { // Down
+          head.vx = 0;
+          head.vy = 1;
+        }
+      }
+
+      // All this has to do is draw the snake on the screen. We'll use
+      // poisonous green circles for the (one) segment(s) we have.
+      function ondraw(canvas, context) {
+        // Find the pixel coordinates from the current head cells.
+        // We do this by remembering that each cell is
+        // CELL_WIDTH x CELL_HEIGHT pixels. Since we use circles,
+        // We need to find the *center* of those cells.
+        var x = head.x * CELL_WIDTH + CELL_WIDTH / 2;
+        // Equivalent logic - the power of algebra:
+        var y = (.5 + head.y) * CELL_HEIGHT;
+        context.clearRect(0, 0, WIDTH, HEIGHT);
+        _fill_circle(context, x, y, Math.min(CELL_WIDTH, CELL_HEIGHT) / 2, "green");
+      }
+
+      _big_bang(WIDTH, HEIGHT, {
+        "tick": ontick,
+        "interval": 200, // 1/5 second
+        "draw": ondraw,
+        "keyinput": onkey,
+      });
+    }
+
+    start_game();
+  </div>
+  <div name="More Snaky">
+    Now that we have the basics of motion and food in the snake game, it's time
+    to figure out how to represent an entire snake.
+
+    The point of this tutorial is not actually to make a snake game, but to
+    learn some interesting and hopefully useful principles. The principle to
+    learn here is how to figure out what state your program needs, and how to
+    convert that state into interesting output and interaction. The |_big_bang|
+    is a nice start (see what I did there?), and now we just have to figure out
+    state and interaction.
+
+    This is the most complex code we have worked with yet. Take a good close
+    look at it after reading through the tutorial here.
+
+    To make a snake, what we really want is a list of positions, starting with
+    the head. Let's change our snake definition accordingly:
+
+      var snake = {
+        "vx": 1,
+        "vy": 0,
+        "segments": [{
+          "x": Math.floor(CELLS_WIDE / 2),
+          "y": Math.floor(CELLS_HIGH / 2),
+        }]
+      };
+
+    Basically, we kept global snake properties like velocity in the main snake
+    object, and we moved segment-level properties into the segments list. The
+    snake starts with one segment.
+
+    Now, with a snake like this, what happens when the it moves? Obviously the
+    head moves, but then everything has to follow behind it until it gets
+    dragged into a new direction. Everything sort of keeps moving toward its
+    next location. There are lots of ways to do this (including adding a new
+    head and removing the tail), but we're going to pick "changing all of the
+    locations". We start at the back of the array and change every segment to
+    have the position of the one before it. Then we move the head according to
+    the directions indicated.
+
+    Exercises
+
+    - Figure out what the code is doing now. There are now multiple segments,
+      and to mix things up, we have changed the way that the snake moves (by
+      adding a head and removing the tail - see the |unshift| Array method in
+      the documentation).
+
+    - You might notice after playing the game for a bit that you can't run into
+      yourself. Fix the code to test for a self-crash.
+
+    --
+
+    var CELLS_WIDE = 30, CELLS_HIGH = 30,
+        CELL_WIDTH = 15, CELL_HEIGHT = 15;
+
+    var WIDTH = CELLS_WIDE * CELL_WIDTH,
+        HEIGHT = CELLS_HIGH * CELL_HEIGHT;
+
+    function start_game() {
+      var snake = {
+        vx: 1, vy: 0,
+        segments: [{x: Math.floor(CELLS_WIDE / 2), y: Math.floor(CELLS_HIGH / 2)}],
+      };
+
+      // To create new food, we need to make sure it doesn't
+      // land on the current head.
+      function new_food() {
+        var head = snake.segments[0];
+        var x, y;
+        do {
+          x = Math.floor(Math.random() * CELLS_WIDE);
+          y = Math.floor(Math.random() * CELLS_HIGH);
+        } while (x == head.x &amp;&amp; y == head.y);
+        return {x: x, y: y};
+      }
+
+      var food = new_food();
+
+      // When the clock ticks, we advance the snake in whatever
+      // direction it is already moving, and we check for crashes.
+      function ontick() {
+        var head = snake.segments[0];
+        var new_x = head.x + snake.vx;
+        var new_y = head.y + snake.vy;
+        if (new_x &lt; 0 || new_x &gt;= CELLS_WIDE ||
+            new_y &lt; 0 || new_y &gt;= CELLS_HIGH) {
+          _output("Crashed");
+          return false; // game over
+        }
+        // Add the new head.
+        snake.segments.unshift({x: new_x, y: new_y});
+        if (new_x == food.x &amp;&amp; new_y == food.y) {
+          // Make new food.
+          food = new_food();
+        } else {
+          // Didn't eat - don't grow - take the end off.
+          snake.segments.pop();
+        }
+        return true; // continue ticking
+      }
+
+      function onkey(event) {
+        if (event.type != "keydown") {
+          return;
+        }
+        if (37 == event.keyCode) { // Left
+          snake.vx = -1;
+          snake.vy = 0;
+        } else if (38 == event.keyCode) { // Up
+          snake.vx = 0;
+          snake.vy = -1;
+        } else if (39 == event.keyCode) { // Right
+          snake.vx = 1;
+          snake.vy = 0;
+        } else if (40 == event.keyCode) { // Down
+          snake.vx = 0;
+          snake.vy = 1;
+        }
+      }
+
+      function ondraw(canvas, context) {
+        context.clearRect(0, 0, WIDTH, HEIGHT);
+        _fill_rect(context,
+          food.x * CELL_WIDTH, food.y * CELL_HEIGHT,
+          CELL_WIDTH, CELL_HEIGHT, "red");
+        for (var i = 0; i &lt; snake.segments.length; i++) {
+          var segment = snake.segments[i];
+          var x = (.5 + segment.x) * CELL_WIDTH;
+          var y = (.5 + segment.y) * CELL_HEIGHT;
+          _fill_circle(context, x, y, Math.min(CELL_WIDTH, CELL_HEIGHT) / 2, "green");
+        }
+      }
+
+      _big_bang(WIDTH, HEIGHT, {
+        "tick": ontick,
+        "interval": 200, // 1/5 second
+        "draw": ondraw,
+        "keyinput": onkey,
+      });
+    }
+
+    start_game();
+  </div>
 </div>
 </body>
 </html>
