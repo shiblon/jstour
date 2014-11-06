@@ -9,9 +9,6 @@
 <link rel="stylesheet" href="codemirror/theme/neat.css">
 <script src="jquery/jquery-1.8.2.min.js"></script>
 <script src="codemirror/lib/codemirror.js"></script>
-<script src="codemirror/mode/xml/xml.js"></script>
-<script src="codemirror/mode/css/css.js"></script>
-<script src="codemirror/mode/htmlmixed/htmlmixed.js"></script>
 <script src="codemirror/mode/javascript/javascript.js"></script>
 <script src="angular/angular.min.js"></script>
 <script src="angular/angular-sanitize.min.js"></script>
@@ -23,8 +20,8 @@
 <body ng-controller="CodeCtrl">
 <div id="content_container" ng-class="{'collapsed': contentCollapsed}">
   <div id="toc-trigger">
-    <a href="http://developer.mozilla.org/" target="mdn_docs">MDN Docs</a> |
-    <a href="http://w3schools.com/" target="w3schools_docs">W3 Schools Docs</a>
+    <a href="http://developer.mozilla.org/">MDN Docs</a> |
+    <a href="http://w3schools.com/">W3 Schools Docs</a>
   </div>
   <div id="content-header">
     <h1>Interactive JavaScript Tutorial <span class="toc" ng-click="tocShowing = !tocShowing">&#x25bc;</span></h1>
@@ -45,8 +42,14 @@
       <h1>{{tutorial.title}}</h1>
       <div ng-bind-html="tutorial.description | linky | paragraphs"></div>
     </div>
-    <div id="tutorial_nav">
-      <a class="nav" ng-class="{'hidden': chapter <= 1}" href="#/{{prevChapter()}}">&#x25c0;</a>{{chapter}}<a class="nav" ng-class="{'hidden': chapter >= tutorials.length }" href="#/{{nextChapter()}}">&#x25b6;</a>
+    <div id="content_bottom">
+      <div id="about">
+        <a href="http://github.com/shiblon/jstour">Source at GitHub</a> |
+        by <a href="http://google.com/+ChrisMonson">Chris Monson</a>
+      </div>
+      <span id="tutorial_nav">
+        <a class="nav" ng-class="{'hidden': chapter <= 1}" href="#/{{prevChapter()}}">&#x25c0;</a>{{chapter}}<a class="nav" ng-class="{'hidden': chapter >= tutorials.length }" href="#/{{nextChapter()}}">&#x25b6;</a>
+      </span>
     </div>
   </div>
 </div>
@@ -67,7 +70,7 @@
     </ul>
   </div>
   <div id="workspace_top">
-    <textarea id="codetext" ui-codemirror="{lineNumbers: true, theme: 'neat', indentWithTabs: false, tabSize: 2, indentUnit: 2, extraKeys: {Tab: 'indentMore', 'Shift-Enter': doNothing } }" ng-model="code"></textarea>
+    <textarea id="codetext" ui-codemirror="{mode: 'javascript', lineNumbers: true, theme: 'neat', indentWithTabs: false, tabSize: 2, indentUnit: 2, extraKeys: {Tab: 'indentMore', 'Shift-Enter': doNothing } }" ng-model="code"></textarea>
   </div>
   <div id="workspace_bottom">
     <div id="output">
@@ -2705,22 +2708,70 @@
     var q = new Pos(-1, -12);
     _output(p, "+", q, "=", p.add(q));
   </div>
-  <div name="Out of the Box" mode="text/html">
-    Up until this point, you have been writing and editing code in a pretty
-    special environment. When you write your own JavaScript, it will almost
-    certainly not be in this tutorial. Instead, you would write it to run in
-    your own web page.
+  <div name="What Next?">
+    This particular tutorial is done. Congratulations! You can do real and
+    interesting work using JavaScript. If you aren't perfectly comfortable with
+    it, still, take heart: it takes more than one pass through material like
+    this to really get comfortable.
 
-    That's really all this tutorial is: a glorified web page with some pretty
-    clever JavaScript included (i.e., _jQuery_, _CodeMirror_, and _AngularJS_).
+    It would be a great idea to go over it again from the beginning: not only
+    will you get more out of it the second time around, you will also get a
+    picture of how much more you know than when you started!
 
-    We'll start with the simplest way to go about this: write your own HTML
-    file and include the JavaScript code directly inside of it. This tutorial
-    has aimed to always expose standard functionality before hiding it away for
-    convenience, so you should be able to use all of the tricks you have
-    learned here to make your own programs. Any function that we have exposed
-    that starts with |_| is, of course, unique to this tutorial, but those were
-    only ever introduced after exposing how they worked.
+    Once you feel comfortable with this material, it is time to graduate to
+    writing your own JavaScript applications in your own web pages, a concept
+    that is beyond the scope of this language tutorial. Fortunately, there are
+    a lot of good materials out there, all of which will make more sense after
+    going through this tour.
+
+    Here are some parting shots, intended to get you started on the right path
+    as quickly as possible.
+
+    - Source code for this tutorial is available at http://github.com/shiblon/jstour.
+      It is all JavaScript and HTML. If you want to know how things work, check
+      it out. It uses **AngularJS**, **jQuery**, and **CodeMirror** (for the
+      nifty colored code window). To get started, check out the |static/index.html|
+      file and note all of the different |&lt;script&gt;| tags. The main
+      functionality is in |static/js/controllers.js|.
+
+    - Pretty much everyone uses helper libraries to manipulate the DOM. Even
+      modern browsers are all different, and it makes sense to use something
+      written with the express intent of hiding those differences from you.
+      Libraries like **jQuery** (highly recommended) make doing just about
+      everything with your web page easier. There are others like it, but it
+      is probably the most common and comprehensive: http://jquery.com.
+
+    - Speaking of libraries, **AngularJS** is top notch. It makes building web
+      sites like this one a whole lot easier, and is well worth the time
+      investment to learn. Additionally, learning something like AngularJS is a
+      nice way to get your feet wet with web pages in general, since the
+      tutorial goes over basic web page construction and helps you fit together
+      HTML and JavaScript in order to get started: http://angularjs.org/.
+
+    - Once you have learned how to wire HTML and JavaScript together, head over
+      to http://jsfiddle.net and see what they have to offer there. It's not
+      only a great way to play around and experiment, it is also a great way to
+      get other people to help you: post a link to your fiddle and they can
+      suggest changes and offer advice.
+
+    - Never forget this little tidbit: once you learn one programming language,
+      it is *far* easier to learn another one. JavaScript shares a syntactical
+      heritage with other mainstream languages like C, C++, and Java. If you were
+      to want to continue learning, you might try Python - a powerful
+      langauge that is also easy and quick to learn. In fact, you can get a
+      similar tour for it here: http://github.com/shiblon/pytour.
+
+    - If you want to learn a completely different way of thinking about
+      programming, learn a LISP variant like Racket: http://racket-lang.org.
+      It will expand your mind. Download, install, then head over to
+      http://www.ccs.neu.edu/home/matthias/HtDP2e/index.html.
+
+    That's about it! Feel free to fiddle in the code window to your heart's
+    content. It has been left blank just for you. All of the _-prefixed
+    functions are available to you from previous chapters. Have fun!
+
+    --
+
   </div>
 </div>
 </body>

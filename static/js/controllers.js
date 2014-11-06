@@ -85,14 +85,6 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   // TOC should be off when we start.
   $scope.tocShowing = false;
 
-  $scope.mirror = function() {
-    var node = document.getElementsByClassName("CodeMirror")[0];
-    if (node) {
-      return node.CodeMirror;
-    }
-    return undefined;
-  };
-
   // Get the tutorials out of the document itself.
   (function() {
     var lineSplit = function(text) {
@@ -154,7 +146,6 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       var chapter = $(rawChapters[c]);
       var title = chapter.attr('name');
       var text = chapter.text();
-      var mode = chapter.attr('mode') || $scope.defaultMode;
 
       var lines = dedent(trimBlanks(lineSplit(text)));
       var data = splitProseAndCode(lines);
@@ -167,20 +158,13 @@ function CodeCtrl($scope, $http, $location, $timeout) {
         'title': title,
         'description': prose,
         'code': code,
-        'mode': mode,
       });
     }
     $scope.tutorials = chapterObjs;
     // Call this instead of accessing $scope.tutorials directly.
-    // It allows us to do things like switching out the CodeMirror mode.
+    // This allows us, if we want, to change settings for each page.
     function loadTutorial(index) {
-      var t = $scope.tutorials[index],
-          m = $scope.mirror();
-      if (m && t.mode && t.mode != m.getMode()) {
-        m.setOption('mode', t.mode);
-        m.refresh();
-      }
-      return t;
+      return $scope.tutorials[index];
     }
     $scope.tutorial = loadTutorial($scope.chapter - 1);
     $scope.loadCode();
