@@ -1557,7 +1557,7 @@
     We won't be specifying a URL, and the name of the window doesn't much
     matter, but we do want to tell it how big to be, so we'll use the spec:
 
-      window.open(null, null, "height=200,width=200");
+      window.open("", null, "height=200,width=200");
 
     Once we do open a window, we can then access all kinds of stuff within it.
     For example, every window has a |document|, and every |document| has a
@@ -1575,14 +1575,14 @@
       giving the window a name in |window.open|.
 
     - Now when you run the code, click away and run it again, |w| is a
-      reference to that original window. But it dosen't come to the front when
+      reference to that original window. But it doesn't come to the front when
       you do that. Add a |w.focus()| call after |window.open| to make the window
       come forward when you run the code again.
 
     --
 
     // Open a window, put some text in it, get rid of margins.
-    var w = window.open(null, null, "height=200,width=200");
+    var w = window.open("", null, "height=200,width=200");
     w.document.body.style.margin = "0";
     w.document.body.innerHTML = "Hello game world!";
 
@@ -1851,7 +1851,7 @@
   <div name="Animation in a Window">
     Let's move this animation to its own window. Remember this little dance?
 
-      var win = window.open(null, name, spec);
+      var win = window.open("", name, spec);
       win.focus();
 
       var canvas = document.createElement('canvas');
@@ -2142,8 +2142,8 @@
       var ctx = wc.context;
 
       canvas.addEventListener('mousedown', function(event) {
-        var x = event.offsetX;
-        var y = event.offsetY;
+        var x = event.clientX;
+        var y = event.clientY;
         _output("down", x, y);
         _fill_circle(ctx, x, y, radius, color);
       });

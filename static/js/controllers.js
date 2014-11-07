@@ -244,7 +244,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       if (name === undefined) {
         name = "canvasWindow";
       }
-      var win = window.open(null, name, "height=" + height + ",width=" + width);
+      var win = window.open("", name, "height=" + height + ",width=" + width);
       win.focus();
       win.document.body.style.margin = "0";
       win.document.body.style.padding = "0";
@@ -363,8 +363,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       eval($scope.code);
     } catch(err) {
       console.log(err);
-      console.log(err.stack);
-      $scope.addErrorText($scope.prettyStack(err.stack));
+      $scope.addErrorText($scope.prettyError(err));
     }
   };
 
@@ -385,8 +384,12 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     }
   };
 
-  $scope.prettyStack = function(stack) {
-    var lines = stack.split(/\r\n|\r|\n/);
+  $scope.prettyError = function(err) {
+    // If we are dealing with Firefox, just output the message.
+    if (err.stack[0] == '@') {
+      return err.name + ": " + err.message;
+    }
+    var lines = err.stack.split(/\r\n|\r|\n/);
     var output = [lines[0]];
     // Now only keep lines that have <anonymous> as the file name, and filter
     // out irrelevant text from those.
@@ -413,7 +416,9 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope._addText = function(text, elementClass) {
     var output = document.getElementById("output");
-    var scrollDown = (output.scrollHeight - output.clientHeight - output.scrollTop) < 12;
+    var scrolled = output.scrollHeight - output.clientHeight - output.scrollTop;
+    console.log(scrolled);
+    var scrollDown = scrolled < 12;
     var pre = document.createElement("pre");
     pre.setAttribute("class", elementClass);
     pre.appendChild(document.createTextNode(text));
