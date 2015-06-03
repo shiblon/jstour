@@ -915,7 +915,7 @@
     perkyBoolean("");  // false - empty string
     perkyBoolean("0"); // true - non-empty string
     perkyBoolean(0);   // false - numeric zero
- </div>
+  </div>
   <div name="Introduction to Recursion">
     Functions are really neat, and the ability to define your own changes
     the game entirely. One thing that may not be obvious is that functions
@@ -924,12 +924,85 @@
     _recur_ (they do _not_ "recurse" -- that's what _I_ do when I hear that word
     again and again).
 
-    Now that we have conditionals and composite data structures, we can pretty
-    much do anything we want to. The stuff that remains is icing and optimization.
+    Recursion is sometimes a bit mysterious, so let's start with a simple
+    example: function call chaining.
 
-    Let's see if we can use this to add up all of the elements of an array:
+    Suppose we have a function that adds two numbers together, called |sum|:
 
-      var a = [2, 3, 5, 7, 11]; // Some primes
+      function sum(a, b) {
+        return a + b;
+      }
+
+    This should feel familiar by now. If it doesn't, please don't go on - go
+    back and go through the basics of functions first. This is where the jungle
+    thickens.
+
+    We can call that function like this:
+
+      var total = sum(4, 6);
+
+    Let's suppose we have *3* numbers we want to add together: |[3, 5, 7]|. How
+    would we do that? Well, we could do this:
+
+      var partial = sum(3, 5);
+      var total = sum(partial, 7);
+
+    But that introduces a variable that we're just going to throw away. We can
+    fix that by reusing |total|, but what if we just did this instead?
+
+      var total = sum(3, sum(5, 7));
+
+    Do you see what we did there? We know that |sum| returns a single value,
+    the sum of its two arguments. That value *replaces* the call to |sum|, and
+    then is used in another call to |sum|. Again, if this is not comfortable,
+    it's time to stop and practice before moving on.
+
+    Ready? Cool. Now let's suppose that we are summing an array of values:
+
+      var ns = [3, 5, 7];
+      var total = sum(ns[0], sum(ns[1], ns[2]));
+
+    Note that this is _exactly the same_ as before, we're just doing it to an
+    array. What if the array has more numbers?
+
+      var ns = [3, 5, 7, 4];
+      var total = sum(ns[0],
+                      sum(ns[1],
+                          sum(ns[2],
+                              sum(ns[3], 0))));
+
+    What pattern did you see emerge here? Did you see how we snuck a 0 in
+    there? What does that do to the pattern? Could you do this with even larger
+    arrays? Don't move on until you are sure you know the answer, because we're
+    about to do something very different.
+
+    The pattern above is this: |sum| can compute the answer for an entire array
+    if it is given
+
+    # A number in the array (or the index of that number), and
+
+    # The sum of the rest of the array.
+
+    In other words, we can write the pattern like this:
+
+      var total = sum(first_number, sum_of_rest);
+
+    Well, that's a fairly simple pattern. Let's see if we can write a function
+    that does that accepting an array as input and using the above pattern to
+    sum over it:
+
+      function sum(arr) {
+        return arr[0] + sum(arr.slice(1));
+      }
+
+    Whoa. What did we do there? Let's look at it a piece at a time. First, we
+    take the first element of the array using |arr[0]|. We want to add that to
+    sum of the _rest of the array_. To get the "rest" of the array, we take a
+    |slice| starting at index |1| and going to the end: |arr.slice(1)|.
+
+    And that's it! There is one problem, though: if the array is empty, then
+    accessing |arr[0]| will produce an error. Let's fix that:
+
       function sum(arr) {
         if (arr.length == 0) {
           return 0;
@@ -937,23 +1010,12 @@
         return arr[0] + sum(arr.slice(1));
       }
 
-    Whoa. Do you see what we did there? An empty array is defined as having sum
-    of |0|. But a non-empty array is has the sum of its first element and the
-    sum of the rest of its elements. Seems logical, but does it work?
+    And that's what you see in the code window.
 
-    It turns out that it does! You can define functions that _depend on their
-    eventual definition_. This is an incredibly powerful concept, and as alluded
-    to earlier, is powerful enough that you don't need anything other than what
-    you have learned to do arbitrary things with computers.
-
-    If you want to understand how this works, think of it this way: when the
-    JavaScript interpreter encounters a function call (call that "inner") inside
-    of another function (call that "outer"), it suspends "outer" where the call
-    occurs, calls "inner", and then resumes "outer" where it left off with the
-    "inner" value where it belongs.
-
-    That's a lot of words to say "it does what you would pretty much expect, and
-    you can trust it".
+    What we have just done here is a _recursive call_: |sum| has a call to
+    |sum| inside of its definition. This is an incredibly powerful concept, and
+    as alluded to earlier, is powerful enough that you don't need anything
+    other than what you have learned to perform complex computations.
 
     Exercises
 
