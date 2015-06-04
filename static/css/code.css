@@ -99,7 +99,7 @@ html, body {
   border-bottom-right-radius: 8px;
   background: white;
 }
-.CodeMirror {
+div.CodeMirror {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   border: 1px solid gray;
@@ -107,13 +107,13 @@ html, body {
   height: 100%;
   font-size: 12pt;
 }
-.CodeMirror .CodeMirror-scroll {
+div.CodeMirror .CodeMirror-scroll {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   height: 100%;
   background: #ffe;
 }
-.CodeMirror .CodeMirror-gutter {
+div.CodeMirror .CodeMirror-gutter {
   border-top-left-radius: 6px;
 }
 #workspace_actions {
@@ -331,7 +331,7 @@ ul.more li.highlight {
   #workspace {
     margin-top: 25px;
   }
-  .CodeMirror {
+  div.CodeMirror {
     position: relative;
     height: 18em;
   }

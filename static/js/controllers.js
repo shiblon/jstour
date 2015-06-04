@@ -1,6 +1,19 @@
 'use strict';
 
 function CodeCtrl($scope, $http, $location, $timeout) {
+  $scope.mirror = CodeMirror.fromTextArea($('#codetext')[0], {
+      mode: 'javascript',
+      lineNumbers: true,
+      theme: 'neat',
+      indentWithTabs: false,
+      tabSize: 2,
+      indentUnit: 2,
+      extraKeys: {
+        'Tab': 'indentMore',
+        'Shift-Enter': function(){}, // do nothing
+      },
+  });
+
   $(document).keydown(function(event) {
     var e = window.event || event;
     if (e.keyCode == 13 && e.shiftKey) {  // shift-enter
@@ -18,6 +31,13 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     }
   });
 
+  $scope.code = function(code) {
+    if (code === undefined) {
+      return $scope.mirror.getValue();
+    }
+    $scope.mirror.setValue(code);
+  };
+
   $scope.location = $location;
   $scope.canvas = null;
   $scope.defaultMode = "javascript";
@@ -28,7 +48,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   $scope.dirty = function(force_recompute) {
     if (force_recompute || !$scope._dirty) {
       $scope._dirty = ($scope.tutorial != undefined &&
-                       $scope.code != $scope.tutorial.code);
+                       $scope.code() != $scope.tutorial.code);
     }
     return $scope._dirty;
   };
@@ -44,7 +64,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     var dirty = $scope.dirty(true);
 
     // Save to the internal JS cache first.
-    $scope.tutorial.userCode = (dirty) ? $scope.code : undefined;
+    $scope.tutorial.userCode = (dirty) ? $scope.code() : undefined;
 
     // Also save to HTML5 local storage if possible.
     // This protects users against refresh and browser crashes.
@@ -76,9 +96,9 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     // If there is data in userCode now, then we display that. Otherwise we get
     // the tutorial code and display that.
     if ($scope.tutorial.userCode !== undefined) {
-      $scope.code = $scope.tutorial.userCode;
+      $scope.code($scope.tutorial.userCode);
     } else {
-      $scope.code = $scope.tutorial.code;
+      $scope.code($scope.tutorial.code);
     }
     $scope.dirty(true);  // Force dirty bit recomputation.
   };
@@ -360,7 +380,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       wc.window.addEventListener("close", stop);
     };
     try {
-      eval($scope.code);
+      eval($scope.code());
     } catch(err) {
       console.log(err);
       $scope.addErrorText($scope.prettyError(err));
@@ -429,11 +449,11 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   };
 
   $scope.clearCode = function() {
-    $scope.code = "";
+    $scope.code("");
   }
 
   $scope.revertCode = function() {
-    $scope.code = $scope.tutorial.code;
+    $scope.code($scope.tutorial.code);
     // Force dirty bit recomputation:
     $scope.dirty(true);
   };
