@@ -5,12 +5,10 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       mode: 'javascript',
       lineNumbers: true,
       theme: 'neat',
-      indentWithTabs: false,
-      tabSize: 2,
       indentUnit: 2,
       extraKeys: {
         'Tab': 'indentMore',
-        'Shift-Enter': function(){}, // do nothing
+        'Shift-Enter': false,
       },
   });
 
@@ -30,6 +28,14 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       return false;
     }
   });
+
+  window.showdiff = function() {
+    var win = window.open("", null, "height=400,width=400");
+    var cmerge = new CodeMirror.MergeView(win.document.body, {
+      origLeft: $scope.tutorial.code,
+      origRight: $scope.code(),
+    });
+  };
 
   $scope.code = function(code) {
     if (code === undefined) {
