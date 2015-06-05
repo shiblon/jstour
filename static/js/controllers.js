@@ -2,14 +2,14 @@
 
 function CodeCtrl($scope, $http, $location, $timeout) {
   $scope.mirror = CodeMirror.fromTextArea($('#codetext')[0], {
-      mode: 'javascript',
-      lineNumbers: true,
-      theme: 'neat',
-      indentUnit: 2,
-      extraKeys: {
-        'Tab': 'indentMore',
-        'Shift-Enter': false,
-      },
+    mode: 'javascript',
+    lineNumbers: true,
+    theme: 'neat',
+    indentUnit: 2,
+    extraKeys: {
+      'Tab': 'indentMore',
+      'Shift-Enter': false,
+    },
   });
 
   $(document).keydown(function(event) {
@@ -29,11 +29,31 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     }
   });
 
-  window.showdiff = function() {
-    var win = window.open("", null, "height=400,width=400");
-    var cmerge = new CodeMirror.MergeView(win.document.body, {
-      origLeft: $scope.tutorial.code,
-      origRight: $scope.code(),
+  $scope.showDiffIfDirty = function() {
+    if ($scope.dirty()) {
+      $scope.showDiff();
+    }
+  };
+
+  $scope.showDiff = function() {
+    var cm = $('.CodeMirror')[0];
+
+    var win = window.open("diff.html", "DiffWin", "height=600,width=800");
+
+    // We can't use the DOM-ready event here because the scripts won't have run
+    // at that point. Window.load is what we need.
+    var loaded = false;
+    $(win).load(function() {
+      loaded = true;
+      win.diff($scope.tutorial.code, $scope.code());
+    });
+
+    // Refreshing just closes the window. Otherwise it's confusing that it goes
+    // blank.
+    $(win).on('unload', function() {
+      if (loaded) {
+        win.close();
+      }
     });
   };
 

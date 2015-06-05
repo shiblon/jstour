@@ -25,7 +25,7 @@
     <a href="http://w3schools.com/">W3 Schools Docs</a>
   </div>
   <div id="content-header">
-    <h1>Interactive JavaScript Tutorial <span class="toc" ng-click="tocShowing = !tocShowing">&#x25bc;</span></h1>
+    <h1>Interactive JavaScript Tutorial <span class="toc" ng-class="{'toc-showing': tocShowing}" ng-click="tocShowing = !tocShowing" ng-bind-html="tocShowing | inplaceif : '&#x25b2; TOC' : '&#x25bc; TOC' ">&#x25b2;&#x25bc; TOC</span></h1>
     <div id="collapser" ng-click="contentCollapsed=true">&gt;&gt;</div>
     <div id="chapter-num">
       <a class="nav" ng-class="{'hidden': chapter <= 1}" href="#/{{prevChapter()}}">&#x25c0;</a>{{chapter}}<a class="nav" ng-class="{'hidden': chapter >= tutorials.length }" href="#/{{nextChapter()}}">&#x25b6;</a>
@@ -58,16 +58,18 @@
   <span class="chapter">{{chapter}}</span>
 </div>
 <div id="workspace" ng-class="{'fill': contentCollapsed}">
-  <div id="workspace_actions" class="actions" ng-class="{'expanded': isExpanded}">
+  <div id="workspace_actions" class="actions" ng-class="{'expanded': menuExpanded}">
     <div>
-      <a id="run" class="button" ng-click="runCode(code)">RUN</a><a id="more" class="button" ng-click="isExpanded = !isExpanded" ng-class="{'highlight': dirty()}">&#x25bc;</a>
+      <a id="run" class="button" ng-click="runCode(code)">RUN</a><a id="more" class="button" ng-click="menuExpanded = !menuExpanded" ng-class="{'highlight': dirty()}">&#x25bc;</a>
     </div>
-    <ul ng-click="isExpanded=false" class="more">
+    <ul ng-click="menuExpanded=false" class="more">
       <li ng-click="clearOutput()">Clear Output Window</li>
       <li ng-click="clearCode()">Clear Code Window</li>
       <li><hr></li>
-      <li ng-click="revertCode()" ng-class="{'highlight': dirty()}">Restore Slide Code</li>
-      <li ng-click="revertAll()" ng-class="{'highlight': dirty()}">Restore ALL Slides</li>
+      <li ng-click="showDiffIfDirty()"  ng-class="{'disabled': !dirty()}">Show Changes</li>
+      <li><hr></li>
+      <li ng-click="revertCode()" class="highlight" ng-class="{'disabled': !dirty()}">Forget Changes (this slide)</li>
+      <li ng-click="revertAll()" class="highlight">Forget <i>ALL</i> Changes (every slide)</li>
     </ul>
   </div>
   <div id="workspace_top">
@@ -87,13 +89,27 @@
     Here we have a simple "Hello World!" program. Try running it now, either by
     clicking *Run*, or pressing *Shift-Enter*.
 
-    JavaScript is an _imperative_ language, meaning that it does just what you
-    tell it to, one thing at a time, in order. In this case, we have told it to
-    do exactly one thing, which is to show an alert window containing the text
-    |Hello, JavaScript!|. This text is called a *string* (of characters).
+    What happened? The web browser you are running contains a program called a
+    *JavaScript interpreter*. When you ran the program in the code window,
+    you instructed the interpreter to start at the top of the code and do just
+    what it said to do, from top to bottom, one step at a time.
 
-    Once you've tried out some exercises, navigate to other slides using the
-    navigation arrows or the *Page-Up* and *Page-Down* keys.
+    In this case, we have told it to do exactly one thing, which is to show an
+    alert window containing the text |Hello, JavaScript!|. This text is called
+    a *string* (of characters).
+
+    But what is |alert|? And why is there a |;| at the end? We will get to both
+    of those topics shortly. Meanwhile, let's talk a bit about the tutorial
+    itself:
+
+    - The Table of Contents is above, marked *TOC*.
+
+    - *Page-Up* and *Page-Down* keys can be used to navigate.
+
+    - Code can be run with the *Run* button or *Shift-Enter*.
+
+    - Check out the options in the *Run* menu (the arrow). Among other things,
+      you can see what you have changed from the original slide.
 
     Exercises
 
@@ -102,17 +118,71 @@
 
     - Change the string to say hello specifically to you.
 
-    - Print 'Hello, JavaScript!' using two strings instead of one, like this:
-      |alert('Hello ' + 'JavaScript!')|.
+    - Try printing 'Hello, JavaScript!' using two strings instead of one, like
+      this: |alert('Hello ' + 'JavaScript!')|.
 
     --
 
     alert("Hello, JavaScript!");
   </div>
+  <div name="Basics">
+    On the first slide, you did several things:
+
+    - You called a **function**,
+
+    - You passed it an **argument**,
+
+    - You ended the **statement**, and
+
+    - You **interpreted** a **script**.
+
+    That's a lot for just one line! Let's pick this apart a bit. But before we
+    do, don't worry about memorizing all of this. You will get very good with
+    these by the time we are done.
+
+    Let's work backwards. First, the **interpreter**. JavaScript is a language, and
+    your web browser contains an interpreter that speaks it. Like any language,
+    there are rules. If you break them, the interpreter won't understand you and
+    you will see an error.
+
+    This brings us to our first rule: always end your statements with a
+    semicolon. Of all the rules, this is actually the one that JavaScript is
+    most forgiving about, but you can and will get into weird situations if you
+    leave them off. It's best to just always use them.
+
+    This brings us to "statements". A **statement** is basically "one thing" that
+    you are asking the interpreter to do, like a "unit of work". Sometimes it's
+    simple, like |alert('hello')|, but sometimes it's big and complex. The full
+    meaning of it should become clearer with time.
+
+    While we're talking about units of work, a statement that produces a value
+    is called an "expression". We'll see those very soon.
+
+    Finally, the interpreter has a fairly big vocabulary; it already knows a
+    lot of words. One of those words is |alert|. Just like in natural language,
+    some words are like _verbs_ and some are like _nouns_, and sometimes they
+    do different things based on context. The word |alert|, when followed by
+    parentheses, is like a verb: it indicates that you want to _do_ something.
+
+    This is called **calling a function**: placing parentheses after a verb, and
+    depending on what that verb means, optionally passing it **arguments**. These
+    change what the function does when called. For |alert|, if you play around
+    with it, you will see exactly what the argument does: it tells |alert| what
+    to display.
+
+    Finally, a **script** is your program: a sequence of commands that you give to the
+    interpreter, something that you make it do; it follows your script.
+
+    If you want, feel free to poke around a bit more before going on.
+
+    --
+
+    alert("Hello again. It's been a while.");
+  </div>
   <div name="Comments">
-    JavaScript (and many other languages) ignores **comments**: bits of text
-    that start with |//| and extend to the end of the line. They are strictly
-    for humans to read, and do not affect how your program runs.
+    JavaScript, like many other programming languages, ignores **comments**:
+    bits of text that start with |//| and extend to the end of the line. They
+    are strictly for humans to read, and do not affect how your program runs.
 
       // This is a comment.
 
@@ -122,16 +192,15 @@
          multi-line
          comment. */
 
-    These are customarily formatted as seen in the code window, with repeated
+    These are often formatted as seen in the code window, with repeated
     asterisks and the terminator on a line by itself, but that is merely
-    convention. What makes it a comment is the way it begins and ends.
+    convention. What makes it a comment is the way it _begins_ and _ends_.
 
     Comments are useful for making notes to yourself
     or others about how the program's code works.
 
-    Note that comment delimiters like |//| or |/*| and |*/| have to stand alone
-    syntactically to form a comment; if they appear within a string, then they
-    are just part of the string.
+    Note that comment delimiters like |//| or |/*| inside of a string don't
+    mean anything special: they're just part of the string.
 
     Exercises
 
@@ -158,7 +227,7 @@
       var A = "hello";
 
     Now the _variable_ |a| contains the _string_ |"hi"| and |A| contains
-    |"hello"|. Yes, case matters: |a| is not the same as |A|.
+    |"hello"|. Yes, case matters: |a| is _not the same_ as |A|.
 
     In JavaScript, variables spring into existence when they are declared with
     |var| *or* assigned a value. Before that they do not exist, and referring
@@ -199,12 +268,12 @@
   <div name="Numbers">
     JavaScript understands a few fundamental **types** of data. You have
     already encountered a couple of them, namely _strings_ like |"hello"| and
-    _functions_ like |alert|. We'll get to functions later. For now, let's
-    focus on numbers.
+    _functions_ like |alert|. We'll dive more deeply into functions later. For
+    now, let's focus on numbers.
 
     You have already seen examples of numbers being assigned to variables, and
-    it works fairly naturally. Numbers do pretty much what you'd expect them
-    to. You can apply all of the basic mathematical operators to numbers:
+    it works fairly naturally. Numbers do pretty much what you expect.
+    You can apply all of the basic mathematical operators to numbers:
 
       * Multiply
       + Add
@@ -256,7 +325,10 @@
     // How about this?
     var a = (3 + 50) * 2;
   </div>
-  <div name="Basic Syntax Rules">
+  <div name="That Darn Semicolon">
+    If you plan on always using semicolons and never accidentally forgetting
+    one, go ahead and skip this slide.
+
     In the previous examples, we have taken it for granted that every statement
     ends in a semicolon. JavaScript is kind of funny this way, because strictly
     speaking, the semicolon is _not required_. There is a major caveat,
@@ -270,45 +342,38 @@
     There are many more such examples, so always be clear to the parser: use
     semicolons at the end of statements.
 
-    Another important note: "whitespace" is not _usually_ significant. The
-    indentation shown in these slides is for human consumption. The computer
-    doesn't care about it. The same goes for blank lines, spaces between
-    operators and numbers, between statements in function calls, etc.
+    Another important note: extra **whitespace** is not usually significant.
+    The indentation shown in these slides is for humans. The interpreter just
+    skips over it. The same goes for blank lines, spaces between
+    operators and numbers, comments, spaces between statements in function calls, etc.
 
     But this rule is not consistently applied. Where possible, JavaScript will
     insert a virtual semicolon for you at the end of a line if it thinks it
     can, and that can be tough to predict: it's best to just always use them.
 
-    Exercises:
+    Exercises
 
     - Before running the code, guess what the final output will be.
 
     --
 
-    // This is fine. Not really ambiguous. Or is it?
+    // This is allowed - just a number, hanging out, not doing anything.
+    +10;
+
+    // Oops - no semicolon. Is that OK?
+    var a = "message"
+
+    // Yes, because JavaScript can tell that this is a new statement.
+    alert(a);
+
+    // So, this should be fine, too, right?
     var a = "hi there"
 
-    // This works, but it's sort of unclear that it should, because the end of
-    // a line *usually* takes the place of a missing semicolon. This doesn't look
-    // right to a human, but the parser handles it anyway. Many surprising errors
-    // have been hidden by code just like this.
-    var b = "hey "
+    // Oops, this could be part of it, just really far away, even separated by
+    // comments!
+    +10;
 
-        + "there"
-
-    // It's even worse when you consider that the following is valid all by
-    // itself. It produces the value 50.3, but the value is
-    // immediately discarded:
-
-    + 50.3
-
-    // Therefore, so is this. Guess what it outputs.
-
-    var c = "number "
-
-    + 10
-
-    alert(c);
+    alert(a);
   </div>
   <div name="String Escaping">
     There is no difference between |'| and |"| - they both form
@@ -320,7 +385,8 @@
 
     Occasionally, you need to include both kinds of
     quotes inside of a string. In these cases, you can
-    **escape** quotes using a backslash:
+    **escape** quotes (take away their special meaning) using a
+    backslash:
 
       "This string contains the \" delimiter."
 
@@ -333,7 +399,7 @@
     Exercises
 
     - Try creating a string that contains a backslash:
-      it will need to be escaped.
+      the backslash itself will need to be escaped with a backslash.
 
     --
 
@@ -343,69 +409,98 @@
 
     alert(message);
   </div>
-  <div name="Calling Functions">
-    We are now ready to explain something we have been using all along:
-    function calls. JavaScript has a lot of stuff built in that you can just
-    use, and it exposes most of it through functions that you can call.
+  <div name="Adding Strings">
+    JavaScript understands addition, using the |+| operator. That is as you
+    would expect. But it does different things based on the *type* of things
+    you are adding.
 
-    A function is called by placing parentheses after its name. If it accepts
-    **arguments**, then they go inside as in |alert("Hello there!")|, which
-    should look familiar.
+    If you are adding numbers, that works in unsurprising ways. If you are
+    adding strings, however, it _concatenates_ them; it joins them together.
+
+      var myString = "hi " + "there.";
+      // myString now contains "hi there"
+
+    Exercises
+
+    - See if you can predict what the code in the code window does.
+
+    - Try adding a number to a string.
+
+    - Try adding a string to a number.
+
+    --
+
+    alert(5 + 15);
+
+    alert("5" + "15");
+  </div>
+  <div name="Calling Functions">
+    We are finally ready to dig more deeply into function calls. We have been
+    using them from the very beginning: it's hard to learn a language without
+    any verbs! We were introduced to |alert| early on, but JavaScript has a
+    *lot* of functions built in that you can just use.
+
+    A function is **called** (or _invoked_, _executed_, or _run_, take your
+    pick) by placing parentheses after its name. If it accepts **arguments**,
+    then they go inside as in |alert("Hello there!")|, which should look
+    familiar. We'll use some of the |Math| functions as examples here.
 
     All JavaScript functions also **return** something. This means that, in
     addition to taking arguments _in_, they also send values _out_. To obtain
     the returned value of a function, just use that function call in place of a
-    value, e.g., |a = parseInt("1723")| or |alert(parseInt("1723"))|.
+    value, e.g., |a = Math.sqrt(4)| or |alert(Math.ceil(1.5))|. You can
+    think of it replacment: the whole function, including it's name,
+    parentheses, and arguments, is replaced with the value it returns.
 
     You can call some functions with more than one value. In that case, supply
     values separated by commas, e.g., |Math.pow(2, 10)| (more on that later).
 
-    Functions like |alert| are only used for their effect, so they implicitly
-    return the special value |undefined|. Another such function specifically
-    defined for convenience in this browser-based presentation is |_output|. It
-    accepts any number of arguments and outputs all of them, separated by
-    spaces, in the output window.
+    Functions like |alert| are only used for their _side-effects_, so they implicitly
+    return the special value |undefined|.
+
+    As a convenience in this tutorial only, we make another function available
+    to you: |_output|. It accepts _any number_ of arguments and prints all of
+    them, separated by spaces, in the output window.
 
     Exercises
 
-    - Try adding the strings |"2000"| to |"1000"|. Now try adding the result of
-      |parseInt("2000")| to |parseInt("1000")|. What happened? What is |parseInt|
-      doing?
+    - Look up more Math functions here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
 
-    - Convert the string |"3.14159"| into a floating-point number with
-      |parseFloat|.
+    - Try a few of them. See what they do. Try them with integers (like 5) and
+      floating point numbers (like 6.7);
 
-    - Peruse the reference material at
+    - There are a lot more functions in JavaScript. Peruse the reference material at
       https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects
 
     --
-    // This evaluates to the number 2423, but it never used, so that value
-    // is discarded.
-    parseInt("2423");
 
     // This is unique to this course. It is not a standard JavaScript function,
     // but is provided for convenience as you monkey around.
     _output("Hello, output window.");
 
-    // Note that alert evaluates to undefined:
+    // You can give it multiple arguments.
+    _output("intVal", 10);
+
+
+    // Math.pow does exponentiation (a number to the power of another).
+    var y = Math.pow(2, 3);
+    _output(y);
+
+    // Math.floor produces the nearest integer below its argument.
+    _output(Math.floor(3.8));
+
+    // Math.ceil produces the nearest integer above its argument.
+    _output(Math.ceil(2.1));
+
+    // Note that if you just call a math function without outputting its
+    // result, it won't show you anything in the output window.
+    // The call below is replaced by its value, but then we don't do anything
+    // with it, so we don't see it.
+    Math.round(4.4);
+
+    // Note that alert returns the special value "undefined"
     var alertOutput = alert("hello");
     _output("output of alert: " + alertOutput);
-
-    // You can convert strings to numbers:
-    var intVal = parseInt("42");
-    var floatVal = parseFloat("2.718281828");
-
-    // Note, we're kind of glossing over something big here: adding a string to
-    // a value first converts that value to a string, then joins them together.
-    _output("intVal", intVal);
-    _output("floatVal", floatVal);
-    _output("double floatVal", (2 * floatVal));
-
-    // Finally, you can plug evaluated functions directly into the arguments of
-    // other functions. Many of these functions are in their own namespace, and
-    // are specified by the namespace and a dot. Math, for example, has many
-    // interesting and useful functions:
-    _output(Math.floor(3.14159));
   </div>
   <div name="Objects and More Math">
     Now that we know about function calls, we can talk about some of the more
@@ -1930,7 +2025,9 @@
     It returns an object with some useful members:
 
     - window: the window object either created or brought forward
+
     - canvas: the canvas object to draw on
+
     - context: the context to use for drawing
 
     The code window has the animation in it, but this time using the

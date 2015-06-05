@@ -1,4 +1,9 @@
 angular.module('runcodeFilters', []).
+  filter('inplaceif', function() {
+    return function(cond, tval, fval) {
+      return cond ? tval : fval;
+    };
+  }).
   filter('paragraphs', function() {
     var inline_format = function(paragraph) {
       if (paragraph.match(/^\s/)) {
