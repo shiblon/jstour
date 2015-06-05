@@ -35,27 +35,28 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     }
   };
 
-  $scope.showDiff = function() {
-    var cm = $('.CodeMirror')[0];
-
-    var win = window.open("diff.html", "DiffWin", "height=600,width=800");
-
-    // We can't use the DOM-ready event here because the scripts won't have run
-    // at that point. Window.load is what we need.
-    var loaded = false;
-    $(win).load(function() {
-      loaded = true;
-      win.diff($scope.tutorial.code, $scope.code());
-    });
-
-    // Refreshing just closes the window. Otherwise it's confusing that it goes
-    // blank.
-    $(win).on('unload', function() {
-      if (loaded) {
-        win.close();
-      }
+  $scope.doDiff = function(left, right) {
+    var target = $('#diffview')[0];
+    target.innerHTML = '';
+    var mv = CodeMirror.MergeView(target, {
+      orig: right,
+      value: left,
+      mode: 'javascript',
+      lineNumbers: true,
+      highlightDifferences: true,
+      connect: null,
     });
   };
+
+  $scope.showDiff = function() {
+    var cw = $('#workspace_top')[0];
+    // Set the width to be the min of twice the code window width and the screen width:
+    var w = Math.min(cw.clientWidth * 2, screen.width);
+    var h = cw.clientHeight;
+
+    window.open('#/diff/' + $scope.chapter, "DiffWin", "width=" + w + ",height=" + h);
+  };
+
 
   $scope.code = function(code) {
     if (code === undefined) {
@@ -220,25 +221,36 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       $location.path('/1').replace();
     }
 
-    // Notice when the path changes and use that to
-    // navigate, but only after we actually have
-    // data.
-    $scope.$watch('location.path()', function(path) {
-      var newChapter = +path.replace(/^[/]/, '');
-      if (newChapter == 0) {
+    function goToChapter(chapter) {
+      if (chapter == 0) {
         // Special value - don't go to chapter 0.
-        newChapter = $scope.chapter;
+        chapter = $scope.chapter;
         $scope.location.path("/" + $scope.chapter).replace();
       }
       $scope.tocShowing = false;
-      if (newChapter != $scope.chapter) {
+      if (chapter != $scope.chapter) {
         $scope.saveCode();
-        $scope.chapter = newChapter;
-        $scope.tutorial = loadTutorial(newChapter - 1);
+        $scope.chapter = chapter;
+        $scope.tutorial = loadTutorial(chapter - 1);
         $scope.loadCode();
         $scope.clearOutput();
         $(document.body).scrollTop(0);
       }
+    }
+
+    // Notice when the path changes and use that to
+    // navigate, but only after we actually have
+    // data.
+    $scope.$watch('location.path()', function(path) {
+      var pieces = path.split(/[/]/).slice(1);
+      var chapter = +pieces[pieces.length-1];
+      if (pieces[0] == 'diff') {
+        $scope.diffChapter = +pieces[1];
+        goToChapter(chapter);
+        $scope.doDiff($scope.tutorial.code, $scope.code());
+        return;
+      }
+      goToChapter(chapter);
     });
   })();
 

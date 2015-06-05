@@ -19,6 +19,10 @@
 <script src="js/controllers.js"></script>
 </head>
 <body ng-controller="CodeCtrl">
+<div id="diff" ng-class="{'hidden': !diffChapter}">
+  <div id="diffview"></div>
+</div>
+<div id="main-tour" ng-class="{'hidden': diffChapter}">
 <div id="content_container" ng-class="{'collapsed': contentCollapsed}">
   <div id="toc-trigger">
     <a href="http://developer.mozilla.org/">MDN Docs</a> |
@@ -2939,6 +2943,7 @@
     --
 
   </div>
+</div>
 </div>
 </body>
 </html>
