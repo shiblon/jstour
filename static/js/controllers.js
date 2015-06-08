@@ -54,7 +54,8 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     var w = Math.min(cw.clientWidth * 2, screen.width);
     var h = cw.clientHeight;
 
-    window.open('#/diff/' + $scope.chapter, "DiffWin", "width=" + w + ",height=" + h);
+    var w = window.open('#/diff/' + $scope.chapter, "DiffWin-" + $scope.chapter, "width=" + w + ",height=" + h);
+    w.focus();
   };
 
 
@@ -488,7 +489,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
   $scope.clearCode = function() {
     $scope.code("");
-  }
+  };
 
   $scope.revertCode = function() {
     $scope.code($scope.tutorial.code);
@@ -509,7 +510,7 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       return 0;  // special value meaning don't go there.
     }
     return $scope.tutorial.index;  // chapter - 1
-  }
+  };
 
   $scope.nextChapter = function() {
     if ($scope.tutorial == undefined ||
@@ -517,5 +518,5 @@ function CodeCtrl($scope, $http, $location, $timeout) {
       return 0;  // special value - don't go there.
     }
     return $scope.tutorial.index + 2;  // chapter + 1
-  }
+  };
 }

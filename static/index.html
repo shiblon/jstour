@@ -64,7 +64,7 @@
 <div id="workspace" ng-class="{'fill': contentCollapsed}">
   <div id="workspace_actions" class="actions" ng-class="{'expanded': menuExpanded}">
     <div>
-      <a id="run" class="button" ng-click="runCode(code)">RUN</a><a id="more" class="button" ng-click="menuExpanded = !menuExpanded" ng-class="{'highlight': dirty()}">&#x25bc;</a>
+      <a id="run" class="button" ng-click="runCode()">RUN</a><a id="more" class="button" ng-click="menuExpanded = !menuExpanded" ng-class="{'highlight': dirty()}">&#x25bc;</a>
     </div>
     <ul ng-click="menuExpanded=false" class="more">
       <li ng-click="clearOutput()">Clear Output Window</li>
