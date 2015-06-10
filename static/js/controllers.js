@@ -89,20 +89,23 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     if ($scope.tutorial === undefined) {
       return;
     }
+    if ($scope.inDiff) {
+      return;
+    }
     var dirty = $scope.dirty(true);
 
     // Save to the internal JS cache first.
-    $scope.tutorial.userCode = (dirty) ? $scope.code() : undefined;
+    $scope.userCode = (dirty) ? $scope.code() : undefined;
 
     // Also save to HTML5 local storage if possible.
     // This protects users against refresh and browser crashes.
     if (typeof(Storage) != "undefined") {
-      if ($scope.tutorial.userCode === undefined) {
+      if (!$scope.userCode) {
         localStorage.removeItem($scope.storageKey());
       } else {
         localStorage[$scope.storageKey()] = JSON.stringify({
           time_ms: +new Date(),
-          user_code: $scope.tutorial.userCode,
+          user_code: $scope.userCode,
         });
       }
     }
@@ -112,19 +115,20 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     if ($scope.tutorial === undefined) {
       return;
     }
+    $scope.userCode = undefined;
 
     // Get from localStorage if possible.
     if (typeof(Storage) != "undefined") {
       var val = localStorage[$scope.storageKey()];
       if (val !== undefined) {
         // TODO: Age out old things?
-        $scope.tutorial.userCode = JSON.parse(val).user_code;
+        $scope.userCode = JSON.parse(val).user_code;
       }
     }
     // If there is data in userCode now, then we display that. Otherwise we get
     // the tutorial code and display that.
-    if ($scope.tutorial.userCode !== undefined) {
-      $scope.code($scope.tutorial.userCode);
+    if ($scope.userCode) {
+      $scope.code($scope.userCode);
     } else {
       $scope.code($scope.tutorial.code);
     }
@@ -245,13 +249,13 @@ function CodeCtrl($scope, $http, $location, $timeout) {
     $scope.$watch('location.path()', function(path) {
       var pieces = path.split(/[/]/).slice(1);
       var chapter = +pieces[pieces.length-1];
-      if (pieces[0] == 'diff') {
-        $scope.diffChapter = +pieces[1];
-        goToChapter(chapter);
-        $scope.doDiff($scope.tutorial.code, $scope.code());
-        return;
-      }
+      // This must happen *before* goToChapter, otherwise we might try
+      // interacting with storage in non-diff (periodic saving) mode.
+      $scope.inDiff = pieces[0] == 'diff';
       goToChapter(chapter);
+      if ($scope.inDiff) {
+        $scope.doDiff($scope.tutorial.code, $scope.code());
+      }
     });
   })();
 
@@ -476,7 +480,6 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   $scope._addText = function(text, elementClass) {
     var output = document.getElementById("output");
     var scrolled = output.scrollHeight - output.clientHeight - output.scrollTop;
-    console.log(scrolled);
     var scrollDown = scrolled < 12;
     var pre = document.createElement("pre");
     pre.setAttribute("class", elementClass);
