@@ -1440,6 +1440,20 @@
     all in turn. This is basically quadratic behavior (for a list of size |n|,
     it takes about |n*n| steps).
 
+    Another way of viewing the selection sort is this:
+
+    - Pick the first element as the one to "fix",
+
+    - Find the smallest element of the array from "fix" onward,
+
+    - Swap it with "fix",
+
+    - Move "fix" to the next position and start again until finished.
+
+    This iterative algorithm highlights just how many steps are being done to
+    sort an array this way. An implementation of it (using the first recursive
+    definition) is in the code window.
+
     What if you tried a _divide and conquer_ approach like **mergesort**
     instead? Here's how it works:
 
@@ -1449,12 +1463,19 @@
 
     - Merge them together (repeatedly take the smallest of each).
 
-    This is better. The idea is that smaller lists are (much) faster to sort.
-    Cutting the list in half over and over again means that we eventually end
-    up with empty or one-element arrays, which are trivially sorted. The work
-    done is |n * log(n)| for this algorithm, better than |n * n|.
+    This is better. The idea is that smaller lists are (much) faster to sort,
+    and once sorted, merging is very simple: the smallest element of each
+    sub-array is already at the front.
 
-    Implementations of both sorts are provided in the code window.
+    If we divide the array into two pieces, then we can divide each of *those*
+    into two pieces and sort even smaller arrays. If you keep going like that,
+    you eventually have an empty or 1-element array to sort, and those are both
+    already sorted!
+
+    The work done is |n * log(n)| for this divide-and-conquer algorithm, far
+    better than |n * n|.
+
+    A recursive implementation of mergesort is also provided in the code window.
 
     Exercises
 
