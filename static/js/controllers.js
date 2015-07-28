@@ -271,6 +271,9 @@ function CodeCtrl($scope, $http, $location, $timeout) {
   });
 
   $scope.runCode = function() {
+    // Note that this is not the most efficient approach, but we push args this
+    // way because it is easy for students to understand. Outputting the text
+    // of this function is part of the stuff students do in the lessons.
     $scope.clearOutput();
     window._output = function(text) {
       var args = [];

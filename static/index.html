@@ -1791,9 +1791,9 @@
     function. It returns a number between |0.0| (inclusive) and |1.0|
     (exclusive). Let's see if we can use it to create random rectangle corners.
 
-    Note that we pull a nifty trick to get random colors. Because colors are
-    just integers in the range 0 (000000 hex) to 16777215 (FFFFFF hex), we can
-    create a random number in that range and get a valid color.
+    Note that we pull a nifty trick to get random colors. Because you can
+    represent colors as integers in the range 0 (000 hex) to 4095 (fff hex), we
+    can create a random number in that range and get a valid color.
 
     As a quick reminder, hexadecimal is a number base with the digits |0| through
     |f|. There are 16 of them, so |f| is |15| in decimal. If you were counting
@@ -1801,17 +1801,28 @@
 
       0 1 2 3 4 5 6 7 8 9 a b c d e f 10 11 12 ...
 
-    Thus, every two hex digits represents 256 values (in decimal, two digits
-    represents 100 values). You can assign a value from 0 (black) to 255
+    Thus, every hex digit represents 16 values (in decimal, a digit
+    represents 10 values). You can assign a value from 0 (black) to 15
     (maximum brightness) to each of red, green, and blue to get a color
     mixture. Prefix it with "#", and the DOM knows exactly how to display it.
     The |toString| method of all Numbers accepts an optional base, which we
     give as |16|, indicating hexadecimal.
 
+    Note that you can also use 6 hex digits to get finer color control. The DOM
+    knows how to deal with numbers like #ff0 as well as #ffff00 (two digits per
+    color).
+
     Exercises
 
-    - Fix this code so that every time it is run, the canvas is cleared before
-      the new rectangle is built.
+    - There is a bug in this code where colors are calculated. Sometimes a
+      number with only two digits will be produced. The DOM doesn't know how to
+      deal with that, so it outputs black. Fix it to add zeros to the front of
+      the color number when it is two short.
+
+    - There is another interesting effect in this code: sometimes the
+      rectangles are printed partially out of bounds on the right or bottom of
+      the canvas. Change the x and y calculattions so that rectangles are never
+      out of bounds.
 
     --
 
@@ -1832,10 +1843,11 @@
     var ctx = c.getContext('2d');
 
     // Let's mix up the colors, shall we? We can use any
-    // valid integer from 0 (black) to 0xFFFFFF (white,
-    // also the maximum color value 16777215) to represent
-    // the RGB color.
-    ctx.fillStyle = "#" + Math.floor(Math.random() * 0x1000000).toString(16);
+    // valid integer from 0 (black) to 0xFFF (white,
+    // also the maximum color value 4095) to represent
+    // the RGB color. Since Math.random() returns numbers from 0 to not quite
+    // 1, we multiply by the maximum color + 1 (0xFFF + 1 = 0x1000).
+    ctx.fillStyle = "#" + Math.floor(Math.random() * 0x1000).toString(16);
 
     ctx.fillRect(x, y, RECT_WIDTH, RECT_HEIGHT);
   </div>
