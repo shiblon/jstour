@@ -1,6 +1,43 @@
 'use strict';
 
 function CodeCtrl($scope, $http, $location, $timeout) {
+  function setStorage(keys, val) {
+    if (typeof Storage === "undefined") {
+      return;
+    }
+
+    if (keys.length == 1) {
+      localStorage[keys[0]] = val;
+      return;
+    }
+
+    var obj = {};
+    var curr = obj;
+    for (var i=1, len=keys.length; i<len-1; i++) {
+      curr = curr[keys[i]] = {};
+    }
+    curr[keys[keys.length-1]] = val;
+
+    localStorage[keys[0]] = JSON.stringify(obj);
+  }
+
+  function getStorage(keys) {
+    if (typeof Storage === "undefined") {
+      return undefined;
+    }
+
+    var str = localStorage[keys[0]];
+    if (str == null) {
+      return undefined;
+    }
+    var obj = JSON.parse(str);
+    var curr = obj;
+    for (var i=1, len=keys.length; i<len; i++) {
+      curr = curr[keys[i]];
+    }
+    return curr;
+  }
+
   $scope.mirror = CodeMirror.fromTextArea($('#codetext')[0], {
     mode: 'javascript',
     lineNumbers: true,
@@ -223,10 +260,12 @@ function CodeCtrl($scope, $http, $location, $timeout) {
 
     // Redirect to the first page if none is specified.
     if (!$location.path()) {
-      $location.path('/1').replace();
+      var c = getStorage(['jstut', 'curChapter']) || 1;
+      $location.path('/' + c).replace();
     }
 
     function goToChapter(chapter) {
+      setStorage(['jstut', 'curChapter'], chapter);
       if (chapter == 0) {
         // Special value - don't go to chapter 0.
         chapter = $scope.chapter;
