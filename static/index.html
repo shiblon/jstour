@@ -688,26 +688,12 @@
     _output("10" === 10); // false
     _output(10 == 5 + 5); // true
 
-    _output("Variable assignment satisfies ===");
+    _output("Variables work, too");
     var a = 1543;
     var b = a;
 
     _output(a == b);   // Obviously true - same data.
     _output(a != a+1); // Indeed.
-    _output(a === b);  // Also true. Assignment satisfies '==='.
-
-    // Performing an operation on data like numbers or
-    // strings produces a *new thing*, even if the data is
-    // the same.
-    _output("Same data, might not be the same thingy.");
-    b = a + 1 - 1 * 1.0;
-
-    _output(a == b);   // Still true.
-    _output(a === b);  // Might be true, might not, depending on the implementation.
-
-    _output("not null:", a != null);  // A very common kind of test.
-    var c = null;
-    _output(c !== null);  // false
   </div>
   <div name="Sequences">
     You have already seen one kind of sequence: the String. You can access
