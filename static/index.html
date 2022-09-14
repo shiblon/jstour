@@ -660,23 +660,18 @@
     are numbers with the same value). The value of these operations is a
     *boolean value*, one of **true** or **false**.
 
-    With variables, things get a little bit more interesting. Suppose you have
-    two index cards, each with the number |5| on them. Each card is a
-    _variable_, and the "5" written on them is their _value_. Because they have
-    the same values, they are **equal** in the |==| sense: they contain the
-    same data. But they are not the same card.
+    The |==| operator isn't generally a safe thing to use because it tries to
+    make your types match: it will try to make a number into a string if that
+    helps the equality check, so |"10" == 10|, even though one is a string of
+    characters and the other is a number.
 
-    Now suppose I write "5" on one card, show it to you, and say "This is |a|".
-    Then I show you _the same card again_, but say, "This is |b|". In this
-    case, |a| and |b| are equal in the |is| sense: they are not only equal (|a
-    == b|), they are also referring to the same card (|a === b|). This normally
-    does not matter much, but you will occasionally see |===| in use and should
-    at least know what it means.
-
-    Stretching the index card metaphor to the breaking point, there is a
-    special value in JavaScript called **null**, and you can store it in any variable.
-    Similarly, **undefined** is like having no index card at all, or a blank
-    index card (though this is a gross oversimplification).
+    The |===| operator checks both value *and* type, and is therefore safer: it
+    has fewer surprises. Always use |===| and |!==| when testing for equality,
+    and you will have fewer surprises. This is especially true when comparing
+    things against the value |null|, which is special and usually indicates "no
+    value" or similar. The |==| operator will surprise you when comparing
+    against a variable containing |null|, which can hide serious bugs by
+    failing to show you an error.
 
     Exercises
 
