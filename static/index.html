@@ -235,15 +235,20 @@
 
     In JavaScript, variables spring into existence when they are declared with
     |var| *or* assigned a value. Before that they do not exist, and referring
-    to them is an error (see the exercises). It is typical to declare and
-    assign at the same time. Until more is explained later about when it is
-    appropriate to omit it (hardly ever, it turns out), always use |var| when
-    assigning a variable for the first time.
+    to them is an error, as with `i_dont_exist` on the last line of the example
+    code. It is typical to declare and assign at the same time. Until more is
+    explained later about when it is appropriate to omit it (hardly ever, it
+    turns out), always use |var| when assigning a variable for the first time.
 
     A valid **variable name** can contain letters, numbers, and the characters
     |_| and |$|, but cannot begin with a number (it can also use a substantial
     set of Unicode characters, but we'll stick with plain ASCII for this
     tutorial). A variable can contain any kind of value.
+
+    **Note:** when errors occur in your program, like the reference to the
+    nonexistent variable `i_dont_exist` in the example code, the program will
+    stop running at that point and the interpreter will give up. Any code after
+    the error is ignored and won't run.
 
     Exercises
 
